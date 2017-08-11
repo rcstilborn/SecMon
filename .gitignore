@@ -1,0 +1,7 @@
+.vagrant/
+vagrant-provision.log
+/debug/
+/release/
+/testbuild/
+/.depend/
+
