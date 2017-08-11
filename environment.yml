@@ -1,4 +1,4 @@
-name: aind-cv
+name: ai-cv
 channels:
 - defaults
 dependencies:
@@ -101,5 +101,4 @@ dependencies:
   - werkzeug==0.12.2
   - yolk==0.4.3
   - yolk3k==0.9
-prefix: /home/richard/Dev/anaconda3/envs/aind-cv
 
