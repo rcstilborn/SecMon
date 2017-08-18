@@ -16,7 +16,13 @@ sudo apt-get install -y libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
 # Install tools for gstreamer
 sudo apt-get install -y gstreamer1.0* libgstreamer-plugins-base1.0-dev
 
-# For GUI - not needed?
+# Install glags, glog
+sudo apt-get install -y libgflags-dev libgoogle-glog-dev
+
+# Change the timzone
+sudo timedatectl set-timezone America/Denver
+
+# Not needed?
 #sudo apt-get install -y libgtk-3-dev
 
 # For optimization 
@@ -171,4 +177,61 @@ else
   echo "*************************************"
   echo
 fi
+
+
+# libsourcey & webRTC
+if [ ! -d $HOME/ ]
+then
+  echo
+  echo "*************************************"
+  echo "Installing webRTC"
+  echo "*************************************"
+  echo
+  cd
+  wget -nv -O webrtc-18252-6294a7e-linux-x64.tar.gz https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-18252-6294a7e-linux-x64.tar.gz
+  tar -xf webrtc-18252-6294a7e-linux-x64.tar.gz
+# These instructions did't work
+#  sudo apt-get install -y openssl libssl-dev
+#  mkdir ~/tmp && cd ~/tmp
+#  git clone https://github.com/rcstilborn/webrtc-builds.git
+#  cd webrtc-builds
+#  conda create -y --name webRTCbuild python=2
+#  source activate webRTCbuild
+#  ./build.sh -l jsoncpp -e 1
+#  rm ~/tmp/webrtc-builds
+else
+  echo
+  echo "*************************************"
+  echo "webRTC already installed"
+  echo "*************************************"
+  echo
+fi
+
+
+if [ ! -d $HOME/ ]
+then
+  echo
+  echo "*************************************"
+  echo "Installing libsourcey"
+  echo "*************************************"
+  echo
+  cd ~/tmp
+  git clone https://github.com/sourcey/libsourcey.git
+  cd libsourcey
+  mkdir build
+  cd build
+  cmake .. -DCMAKE_BUILD_TYPE=RELEASE # extra cmake commands here, see below for a full list...
+  make
+  sudo make install
+
+  rm ~/tmp/libsourcey
+else
+  echo
+  echo "*************************************"
+  echo "libsourcey already installed"
+  echo "*************************************"
+  echo
+fi
+
+
 

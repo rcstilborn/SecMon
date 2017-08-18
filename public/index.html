@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta content="initial-scale=1, minimum-scale=1, width=device-width" name="viewport">
+    <title>SecMon</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png">
+
+    <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/images/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+
+    <!-- font-awesome -->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <!-- google font -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700,800' rel='stylesheet' type='text/css'>
+    <!-- bootstrap css 
+    <link rel="stylesheet" href="css/bootstrap.min.css"> -->
+    <!-- custom css 
+    <link rel="stylesheet" href="css/templatemo-style.css"> -->
+    <link href="css/style.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="my-container">  <!-- table -->
+  <header class="header">   <!-- table-row -->
+    <a class="logo" href="#">SecMon</a>
+    <ul id="navBar" class="my-navbar text-uppercase"></ul>
+  </header>
+  <section class="content">  <!-- table-row -->
+    <!-- <div class="foo">-->
+      <div class="home-page page">
+        <h1 class="text-upper">Welcome to SecMon</h1>
+      </div>
+
+      <div class="error-page page">
+        <h3>oops... something went wrong!</h3>
+      </div>
+
+
+<!--
+ **********************************
+ * Single Scene Page
+ *
+ **********************************
+ -->
+      <div class="singleScene page"> <!-- table -->
+        <div class="left-15" id="scene_list">  <!-- table-cell -->
+          <h3>Scene List</h3>
+        </div>
+        <div class="right-remaining" id="scene_display">  <!-- table-cell -->
+          <div class="scene-display"> <!-- table -->
+                <div class="scene" id="camera0" >
+                  <p>Camera 1</p>
+                  <img class="scene-img" id="video0" />
+                </div>
+          </div>  
+        </div>
+      </div>
+
+
+
+
+<!--
+ **********************************
+ * Grid of Four Page
+ *
+ **********************************
+ -->
+      <div class="twoByTwo page"> <!-- table -->
+        <div class="left-15" id="scene_list">  <!-- table-cell -->
+          <h3>Scene List</h3>
+        </div>
+        <div class="right-remaining" id="scene_display">  <!-- table-cell -->
+          <div class="scene-display"> <!-- table -->
+            <div class="row half-row"> <!-- table-row -->
+              <div class="half">
+                <div class="scene" id="camera1" >
+                  <p>Camera 1</p>
+                  <img class="scene-img" id="video1" />
+                </div>
+              </div>
+              <div class="half">
+                <div class="scene" id="camera2" >
+                  <p>Camera 2</p>
+                  <img class="scene-img" id="video2" />
+                </div>
+              </div>
+            </div>
+            <div class="row half-row">
+              <div class="half">
+                <div class="scene" id="camera3" >
+                  <p>Camera 3</p>
+                  <img class="scene-img" id="video3" />
+                </div>
+              </div>
+              <div class="half">
+                <div class="scene" id="camera4" >
+                  <p>Camera 4</p>
+                  <img class="scene-img" id="video4" />
+                </div>
+              </div>
+            </div>
+          </div>  
+        </div>
+      </div>
+
+      <div class="cameras page">
+        <h1 class="text-upper">Cameras</h1>
+        <div class="row">
+          <div class="col-md-2">
+            <ul id="cameraList"></ul>
+          </div>
+          <div class="col-md-10">
+            <div id="one_camera">
+              <div id="camera">
+                <h4 id="camera0_name">Cam 1</h4>
+                <!--<img id="image0" src="" alt="No image to display" height="480" width="640">-->
+                <canvas id="stream0" width="960" height="720" style="border:1px solid white;"></canvas>
+                <button id="capture" onclick="capture0();">
+                  &#x2727;
+                </button>
+                <button id="play" onclick="openCamera0();">
+                  &#9658;
+                </button>
+                <button id="pause" onclick="closeCamera0();">
+                  &#10074;&#10074;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cameras-data"></div>
+      </div>
+      <div class="system-status page">
+        <h3>System Status</h3>
+        <p>My first chart</p>
+        <canvas id="myChart" width="400" height="400"></canvas>
+        <div id=system-status-data></div>
+      </div>
+   <!-- </div> -->
+  </section>
+  <footer class="footer">
+    <div id="messages"></div>
+  </footer>
+</div>
+</div>
+
+
+
+<!-- end footer -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

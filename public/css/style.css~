@@ -1,0 +1,279 @@
+* {
+    margin:0;
+    padding:0;
+}
+
+html, body {
+  height: 100%;
+  background: black;
+  color: #337ab7;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.q {
+    width: 50%;
+    height: 50%;
+    float: left;
+    border: 1px solid #28a7e9;
+}
+.my-container { 
+  display: table; 
+  width: 100vw; 
+  height: 100vh; 
+  position: fixed;
+/*
+  box-sizing: border-box;
+border: 5px solid #28a7e9;
+border-radius: 20px;*/
+}
+
+/********* Header ***********/
+.header {
+  display: table-row;
+  height: 50px;
+  line-height: 50px;
+  background: white;
+}
+
+.logo {
+  font-weight: bold;
+  padding-left: 20%;
+  float: left;
+  font-size: 2em;
+  color: #337ab7;
+  text-decoration: none;
+}
+
+ul.my-navbar {
+  list-style-type: none;
+  margin: 0;
+  padding-right: 20%;
+  float: right;
+}
+
+ul.my-navbar li {
+  float: left;
+}
+
+ul.my-navbar a:link, a:visited {
+  font-weight: bold;
+  display: block;
+  width: 120px;
+  font-size: 1.5em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: #337ab7;
+}
+
+/********** Main content part ********/
+.content {
+  position: relative;
+  display: table-row;
+  height: 100%; 
+  width: 100%;
+}
+
+
+.page {
+    opacity: 0;
+    transition: 0.6s;
+  display: table;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  bottom: 75px;
+
+  width: 100%;
+  min-height: calc(100% - 75px);
+  overflow: hidden;
+/*  box-sizing: border-box;
+    border-radius: 20px;
+    border: 2px solid #28a7e9;*/
+}
+
+.page.visible{
+    opacity: 1;
+}
+
+.row { /*display: table-row;*/ }
+.half {
+ /*display: table-cell;*/ 
+  max-width: 50%;
+  min-width: 50%;
+  max-height: 100%;
+  min-height: 100%;
+  float: left;
+  overflow: hidden;
+  box-sizing: border-box;
+    border-radius: 10px;
+    border: 2px solid #28a7e9;
+}
+.half-row { 
+  width: 100%; 
+  height: 50%; 
+  max-height: 50%; 
+  min-height: 50%;
+
+/*  box-sizing: border-box;
+    border-radius: 20px;
+    border: 2px solid #28a7e9;*/
+}
+
+.left-15 {
+  position: relative;
+  display: table-cell;
+  width: 15%;
+  min-height: 100%;
+  padding: 10px;
+text-align: center;
+/*  box-sizing: border-box;
+    border-radius: 20px;
+    border: 2px solid #28a7e9;*/
+}
+
+.right-remaining {
+  position: relative;
+  display: table-cell;
+  width: auto;
+  min-height: 100%;
+/*  padding: 10px;
+    border-radius: 20px;
+    border: 2px solid #28a7e9; */
+}
+
+
+
+.home-page {
+}
+
+.home-page h1{
+    margin-top: 1em;
+    font-size: 2em;
+    color:  #5a96b9;
+    text-align: center;
+}
+
+
+.home-page h3{
+    font-size: 40px;
+}
+.error-page {
+}
+
+.cameras {
+}
+
+#one_camera{
+    border-radius: 10px;
+    border: 2px solid #28a7e9;
+    padding: 20px;
+
+}
+
+#cameraList {
+    border-radius: 10px;
+    border: 2px solid #28a7e9;
+    padding: 20px;
+    min-height: 400px;
+}
+
+
+.scene-display {
+/*  display: table;*/
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+/*  box-sizing: border-box;
+    border-radius: 20px;
+    border: 2px solid #28a7e9;*/
+}
+
+.scene {
+
+  max-height: inherit;
+  max-width: 100%;
+  text-align: center;
+} 
+
+
+.scene-img {
+  width: auto;
+  height : auto;
+  max-height: inherit;
+  max-width: inherit;
+  object-fit: contain;
+}
+
+p {
+    color: white;
+}
+
+footer
+    {
+  display: table-row;
+  background: white;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  color: black;
+}
+
+/*#info {*/
+/*font-size: 20px;*/
+/*}*/
+
+/*#div_start {*/
+/*float: right;*/
+/*}*/
+/*#headline {*/
+/*text-decoration: none*/
+/*}*/
+/*#results {*/
+/*font-size: 14px;*/
+/*font-weight: bold;*/
+/*border: 1px solid #ddd;*/
+/*padding: 15px;*/
+/*text-align: left;*/
+/*min-height: 150px;*/
+/*}*/
+/*#start_button {*/
+/*border: 0;*/
+/*background-color:transparent;*/
+/*padding: 0;*/
+/*}*/
+/*.interim {*/
+/*color: gray;*/
+/*}*/
+/*.final {*/
+/*color: black;*/
+/*padding-right: 3px;*/
+/*}*/
+/*.button {*/
+/*display: none;*/
+/*}*/
+/*.marquee {*/
+/*margin: 20px auto;*/
+/*}*/
+
+/*#buttons {*/
+/*margin: 10px 0;*/
+/*position: relative;*/
+/*top: -50px;*/
+/*}*/
+
+/*#copy {*/
+/*margin-top: 20px;*/
+/*}*/
+
+/*#copy > div {*/
+/*display: none;*/
+/*margin: 0 70px;*/
+/*}*/
+
+/*h1 {*/
+/*text-align: center;*/
+/*}*/
+/*a.c1 {font-weight: normal;}*/
