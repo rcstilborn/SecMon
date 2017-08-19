@@ -86,8 +86,8 @@ RELDIR = release
 RELDEPDIR = .depend/$(RELDIR)
 RELEXE = $(RELDIR)/$(EXE)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
-RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mmmx -msse -msse2 -msse3 -msse4.1 -mmovbe -mfpmath=sse -ffast-math -fomit-frame-pointer -ffunction-sections
-
+#RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mtune=native -mmmx -msse -msse2 -msse3 -msse4.1 -mmovbe -mfpmath=sse -ffast-math -fomit-frame-pointer -ffunction-sections
+RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mtune=native -ffast-math -fomit-frame-pointer -ffunction-sections
 .PHONY: all clean debug prep release remake test
 
 .SECONDARY:

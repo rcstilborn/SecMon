@@ -22,17 +22,18 @@
 #include <cstdbool>
 #include <iostream>
 
+DEFINE_int32(port,12345,"Port for webserver");
+DEFINE_string(ip_address,"","IP Address of web server");
+DEFINE_string(doc_root,"public","Document root for web server");
+#ifdef DEBUG
 static bool ValidateIPaddress(const char* flagname, const std::string& value) {
    if (value.find(".") != std::string::npos)   // value is ok
      return true;
    std::cerr << "Invalid value for --" << flagname << ": " << value << std::endl;
    return false;
 }
-DEFINE_int32(port,12345,"Port for webserver");
-DEFINE_string(ip_address,"","IP Address of web server");
-DEFINE_string(doc_root,"public","Document root for web server");
 DEFINE_validator(ip_address, &ValidateIPaddress);
-
+#endif // DEBUG
 
 namespace http {
 

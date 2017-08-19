@@ -22,14 +22,17 @@
 #include "PerformanceMetrics.h"
 #include "SceneMonitor.h"
 
+DEFINE_string(camera1,"","Source for camera 1 stream (file or ip address)");
+// This is needed because of compiler warning for release builds
+#ifdef DEBUG
 static bool ValidateCamera(const char* flagname, const std::string& value) {
    if (value!="")   // value is ok
      return true;
    std::cout << "Invalid value for --" << flagname << ": " << value << std::endl;
    return false;
 }
-DEFINE_string(camera1,"","Source for camera 1 stream (file or ip address)");
 DEFINE_validator(camera1, &ValidateCamera);
+#endif // DEBUG
 
 /*
 
