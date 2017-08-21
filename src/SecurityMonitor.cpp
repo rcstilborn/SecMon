@@ -25,11 +25,12 @@
 DEFINE_string(camera1,"","Source for camera 1 stream (file or ip address)");
 // This is needed because of compiler warning for release builds
 #ifdef DEBUG
-static bool ValidateCamera(const char* flagname, const std::string& value) {
-   if (value!="")   // value is ok
-     return true;
-   std::cout << "Invalid value for --" << flagname << ": " << value << std::endl;
-   return false;
+static bool ValidateCamera(const char* flagname, const std::string& value)
+{
+    if (value!="")   // value is ok
+        return true;
+    std::cout << "Invalid value for --" << flagname << ": " << value << std::endl;
+    return false;
 }
 DEFINE_validator(camera1, &ValidateCamera);
 #endif // DEBUG
@@ -72,112 +73,118 @@ int main (int argc, char * argv[])
     gflags::SetVersionString("0.1");
 
 #ifdef DEBUG
-FLAGS_log_dir = "./";
-FLAGS_logtostderr = 1;
-FLAGS_stderrthreshold = 1;
+    FLAGS_log_dir = "./";
+    FLAGS_logtostderr = 1;
+    FLAGS_stderrthreshold = 1;
 #endif // DEBUG
 
-	::google::InitGoogleLogging("SecMon");
+    ::google::InitGoogleLogging("SecMon");
     ::google::InstallFailureSignalHandler();
 
 #ifndef CPU_ONLY
-	std::cout << "GPUs found: " << cv::cuda::getCudaEnabledDeviceCount() << std::endl;
+    std::cout << "GPUs found: " << cv::cuda::getCudaEnabledDeviceCount() << std::endl;
     cv::cuda::printShortCudaDeviceInfo(cv::cuda::getDevice());
 #endif
 
-	std::cout << "Starting " << argv[0] << std::endl;
+    std::cout << "Starting " << argv[0] << std::endl;
 
 
-	// Create the asio service
-	boost::asio::io_service io_service;
+    // Create the asio service
+    boost::asio::io_service io_service;
 
-	boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
-	signals.async_wait(
-			boost::bind(&boost::asio::io_service::stop, &io_service));
+    boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
+    signals.async_wait(
+        boost::bind(&boost::asio::io_service::stop, &io_service));
 
-	// Create the threadpool
-	boost::thread_group threadpool;
+    // Create the threadpool
+    boost::thread_group threadpool;
 
-	try {
-		// GUI interface
-		GUI_Interface gui(io_service);  //, address, port, doc_root);
+    try
+    {
+        // GUI interface
+        GUI_Interface gui(io_service);  //, address, port, doc_root);
 
-		// Main component
-		SceneMonitor sceneMonitor(io_service, gui);
+        // Main component
+        SceneMonitor sceneMonitor(io_service, gui);
 
-		// Create the first scene
-		sceneMonitor.startMonitoring("Camera 1", FLAGS_camera1);
+        // Create the first scene
+        sceneMonitor.startMonitoring("Camera 1", FLAGS_camera1);
 
-		// Start the threadpool
-		for (int i=0; i<num_threads_in_pool;i++)
-			threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
+        // Start the threadpool
+        for (int i=0; i<num_threads_in_pool; i++)
+            threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
 
-		gui.start();
-		PerformanceMetrics pm(io_service);
-		std::cout << "Press <ENTER> to exit" << std::endl << std::endl;
-		while(1) {
-			int ch = getch();
-			// p = 112
-			// Enter = 10
-			if(ch == 112) // p - pause
-				sceneMonitor.togglePause();
-			else if(ch == 115) // s - slow
+        gui.start();
+        PerformanceMetrics pm(io_service);
+        std::cout << "Press <ENTER> to exit" << std::endl << std::endl;
+        while(1)
+        {
+            int ch = getch();
+            // p = 112
+            // Enter = 10
+            if(ch == 112) // p - pause
+                sceneMonitor.togglePause();
+            else if(ch == 115) // s - slow
                 sceneMonitor.setFPS(1);
-			else if(ch == 110) // n - normal
+            else if(ch == 110) // n - normal
                 sceneMonitor.setFPS(10);
-			else if(ch == 102) // f - fast
+            else if(ch == 102) // f - fast
                 sceneMonitor.setFPS(33);
-			else if(ch==10)
-				break;
-		}
-		std::cout << "Stopping monitoring..." << std::endl;
-		sceneMonitor.stopAllMonitoring();
-		std::cout << "Stopping GUI Interface..." << std::endl;
-		gui.shutdown();
-		std::cout << "Shutting down the io service..." << std::endl;
-		io_service.stop();
-		std::cout << "Waiting for threads..." << std::endl;
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		threadpool.interrupt_all();
+            else if(ch==10)
+                break;
+        }
+        std::cout << "Stopping monitoring..." << std::endl;
+        sceneMonitor.stopAllMonitoring();
+        std::cout << "Stopping GUI Interface..." << std::endl;
+        gui.shutdown();
+        std::cout << "Shutting down the io service..." << std::endl;
+        io_service.stop();
+        std::cout << "Waiting for threads..." << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        threadpool.interrupt_all();
 
-	} catch (std::exception& e) {
-		std::cout << "Caught exception: " << e.what() << std::endl;
-	}
-	return 0;
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "Caught exception: " << e.what() << std::endl;
+    }
+    return 0;
 
 }
 
 
-void doMenu() {
-	//	initscr();
-	//	cbreak();
-	//	noecho();
-	//	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-	std::cout << "Press <ENTER> to exit";
-	//	int ch = getch();
-	std::cin.get();
+void doMenu()
+{
+    //	initscr();
+    //	cbreak();
+    //	noecho();
+    //	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    std::cout << "Press <ENTER> to exit";
+    //	int ch = getch();
+    std::cin.get();
 }
 
-char getch() {
-        char buf = 0;
+char getch()
+{
+    char buf = 0;
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-        struct termios old = {0,0,0,0,0,0,0,0,0};
+    struct termios old = {0,0,0,0,0,0,0,0,0};
 #pragma GCC diagnostic error "-Wmissing-field-initializers"
-        if (tcgetattr(0, &old) < 0)
-                perror("tcsetattr()");
-        old.c_lflag &= ~ICANON;
-        old.c_lflag &= ~ECHO;
-        old.c_cc[VMIN] = 1;
-        old.c_cc[VTIME] = 0;
-        if (tcsetattr(0, TCSANOW, &old) < 0)
-                perror("tcsetattr ICANON");
-        if (read(0, &buf, 1) < 0)
-                perror ("read()");
-        old.c_lflag |= ICANON;
-        old.c_lflag |= ECHO;
-        if (tcsetattr(0, TCSADRAIN, &old) < 0)
-                perror ("tcsetattr ~ICANON");
-        return (buf);
+    if (tcgetattr(0, &old) < 0)
+        perror("tcsetattr()");
+    old.c_lflag &= ~ICANON;
+    old.c_lflag &= ~ECHO;
+    old.c_cc[VMIN] = 1;
+    old.c_cc[VTIME] = 0;
+    if (tcsetattr(0, TCSANOW, &old) < 0)
+        perror("tcsetattr ICANON");
+    if (read(0, &buf, 1) < 0)
+        perror ("read()");
+    old.c_lflag |= ICANON;
+    old.c_lflag |= ECHO;
+    if (tcsetattr(0, TCSADRAIN, &old) < 0)
+        perror ("tcsetattr ~ICANON");
+    return (buf);
 }
 
 //a   97

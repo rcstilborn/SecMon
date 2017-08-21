@@ -179,6 +179,35 @@ else
 fi
 
 
+if [ ! -d /usr/local/include/gtest ]
+then
+  echo
+  echo "*************************************"
+  echo "Installing googletest and googlemock"
+  echo "*************************************"
+  echo
+
+  git clone https://github.com/google/googletest.git
+  cd googletest/googletest/make
+  make
+  sudo cp gtest_main.a /usr/local/lib
+  cd ../../include
+  sudo cp -r gtest /usr/local/include
+
+  #rm -rf 
+else
+  echo
+  echo "*************************************"
+  echo "googletest and googlemock already installed"
+  echo "*************************************"
+  echo
+fi
+
+
+
+
+exit
+
 # libsourcey & webRTC
 if [ ! -d $HOME/ ]
 then
@@ -208,6 +237,7 @@ else
 fi
 
 
+
 if [ ! -d $HOME/ ]
 then
   echo
@@ -232,6 +262,5 @@ else
   echo "*************************************"
   echo
 fi
-
 
 
