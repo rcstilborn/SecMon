@@ -45,10 +45,14 @@ private:
 
 	bool shuttingDown;
 	typedef std::set<websocketpp::connection_hdl,std::owner_less<websocketpp::connection_hdl>> occupant_list;
+// This will all get refactored away when we move to libsourcey
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 	typedef struct {
 		occupant_list occupants;
 		boost::function<const std::string()> welcomeMessageProvider;
 	} room;
+#pragma GCC diagnostic pop
 	typedef std::map<std::string,room> room_list;
 
     typedef websocketpp::message_buffer::message<websocketpp::message_buffer::alloc::con_msg_manager> message_type;

@@ -27,10 +27,10 @@ public:
 	int getStreamId() const;
 
 private:
-	std::vector<http::stream_connection_ptr> connection_list_;
-	boost::mutex connection_list_mtx_;
 	boost::signals2::signal<void (boost::shared_ptr<std::vector<unsigned char>>)>& signal_;
 	int stream_id_;
+	std::vector<http::stream_connection_ptr> connection_list_;
+	boost::mutex connection_list_mtx_;
 };
 
 #endif /* GUI_STREAM_H_ */

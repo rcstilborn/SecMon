@@ -17,7 +17,9 @@ SceneInterface::SceneInterface(const std::string& displayName, const std::string
 :displayName(displayName),
  description(description),
  gui(gui),
- frameSequence(frameSequence) {
+ frameSequence(frameSequence),
+ streams_list_mtx_(),
+ streams() {
 	addStream("main");
 }
 

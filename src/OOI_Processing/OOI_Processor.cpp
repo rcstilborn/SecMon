@@ -28,7 +28,8 @@ OOI_Processor::OOI_Processor(boost::asio::io_service& io_service, SceneInterface
 //		  "/usr/local/caffe-master/data/ilsvrc12/synset_words.txt"),
 		  sceneIf(sceneIf),
 		  frameSequence(frameSequence),
-		  next(next){
+		  next(next),
+		  ooiList(){
 	// TODO Auto-generated constructor stub
 
 }

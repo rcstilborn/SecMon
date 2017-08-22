@@ -30,7 +30,12 @@ using namespace boost::placeholders;
 WebSocketServer::WebSocketServer(boost::asio::io_service& io_service)
 : io_service(io_service),
   server(),
-  shuttingDown(false){
+  shuttingDown(false),
+  master_list(),
+  master_list_mtx(),
+  rooms(),
+  rooms_mtx()
+  {
 	server.set_reuse_addr(true);
 	server.set_message_handler(boost::bind(&WebSocketServer::on_message, this, _1, _2));
 	server.set_close_handler(boost::bind(&WebSocketServer::on_close, this, _1));

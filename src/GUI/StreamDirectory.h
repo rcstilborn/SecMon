@@ -33,9 +33,9 @@ public:
 private:
 	/// The io_service used to perform asynchronous operations.
 	boost::asio::io_service& io_service_;
+	int stream_id;
 	std::map<const int,boost::shared_ptr<Stream>> stream_list_;
 	boost::mutex stream_list_mtx_;
-	int stream_id;
 };
 
 #endif /* GUI_STREAMDIRECTORY_ */

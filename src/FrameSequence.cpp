@@ -18,7 +18,7 @@
 #include "Frame.h"
 
 FrameSequence::FrameSequence()
-: current_frame_id_(0) {
+: current_frame_id_(0), frames(), frame_list_mtx() {
 	//VLOG(1) << "FrameSequence() - constructed";
 }
 

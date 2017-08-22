@@ -22,7 +22,8 @@ ImageProcessor::ImageProcessor(boost::asio::io_service& io_service, SceneInterfa
 : strand(io_service),
   sceneIf(sceneIf),
   frameSequence(frameSequence),
-  next(next)
+  next(next),
+  roi()
 //  main_view_signal(sceneIf.addStream("Main view")),
 //  main_view_signal(sceneIf.addStream("Overlay")),
 //  overlay_view_signal(sceneIf.addStream("Overlay")),

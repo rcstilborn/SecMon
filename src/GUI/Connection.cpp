@@ -21,14 +21,19 @@
 #include "RequestHandler.h"
 
 namespace http {
-
+// I think this came from the Boost::asio demo code.  It will all get refactored away when we move to libsourcey
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 Connection::Connection(boost::asio::io_service& io_service,
 		RequestHandler& handler)
 : strand_(io_service),
   socket_(io_service),
-  request_handler_(handler)
+  request_handler_(handler),
+  buffer_(),
+  request_()
 {
 }
+#pragma GCC diagnostic pop
 
 boost::asio::ip::tcp::socket& Connection::socket()
 {

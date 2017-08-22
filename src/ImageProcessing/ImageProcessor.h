@@ -23,13 +23,17 @@
 class MovementDetector;
 class FrameSequence;
 
-class ImageProcessor : private boost::noncopyable {
+class ImageProcessor {
 public:
 	ImageProcessor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next);
 	virtual ~ImageProcessor();
 	void processNextFrame(const int frameId);
 
 private:
+     ImageProcessor(const ImageProcessor&) = delete;
+     ImageProcessor& operator=(const ImageProcessor&) = delete;
+
+
 	/// Strand to ensure the connection's handlers are not called concurrently.
 	boost::asio::io_service::strand strand;
 

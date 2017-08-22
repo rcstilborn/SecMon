@@ -46,7 +46,7 @@ EXE  = SecMon
 # Compiler flags
 #
 CXX	 = g++
-CXXFLAGS = -Wall -Werror -Wextra -std=c++11
+CXXFLAGS = -Wall -Werror -Wextra -std=c++11 -Weffc++
 %.o : %.cpp
 
 #

@@ -56,9 +56,9 @@ private:
 				std::size_t bytes_transferred);
 
 	  struct FrameToSend {
-//		  FrameToSend() {
+		  FrameToSend(): buffers_(), ptr_() {
 //			  std::cout << "FrameToSend::FrameToSend() - constructed" << std::endl;
-//		  }
+		  }
 //		  ~FrameToSend() {
 //			  std::cout << "FrameToSend::~FrameToSend() - destructed" << std::endl;
 //		  }

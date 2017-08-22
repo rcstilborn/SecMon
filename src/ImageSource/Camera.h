@@ -29,10 +29,10 @@ private:
 	const std::string source_;
 	cv::VideoCapture camera_;
 //	cv::Size size;
-	int fps_;
-	unsigned int width_;
-	unsigned int height_;
-	bool real_camera_;
+	int fps_ = 0;
+	unsigned int width_ = 0;
+	unsigned int height_ = 0;
+	bool real_camera_ = false;
     double text_size_ = 0.75;
     int left_margin_ = 40;
     int top_margin_ = 25;

@@ -23,7 +23,9 @@
 
 Frame::Frame(const int frame_id, const int width, const int height)
 : frame_id_(frame_id),
-  frameSize(width, height){
+  frameSize(width, height),
+  startTime(),
+  RoIs(){
 	//VLOG(2) << "Frame() - constructed id=" <<  frame_id_;
 	image_names[0] = "original";
 	image_names[1] = "overlay";

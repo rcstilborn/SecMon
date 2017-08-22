@@ -37,8 +37,8 @@ public:
 
 private:
 	boost::asio::io_service& io_service;
-	boost::ptr_map<std::string,Scene> scenes;
 	GUI_Interface& gui;
+	boost::ptr_map<std::string,Scene> scenes;
 	boost::mutex scenes_mtx;
 
 };

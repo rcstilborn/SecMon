@@ -28,7 +28,7 @@
 
 
 Camera::Camera(const std::string& source)
-: source_(source) {
+: source_(source), camera_() {
 
 	// Connect to the camera
 	DLOG(INFO) << "Opening camera at " << source_;

@@ -15,7 +15,9 @@
 #include "Header.h"
 
 namespace http {
-
+// I think this came from the Boost::asio demo code.  It will all get refactored away when we move to libsourcey
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 /// A reply to be sent to a client.
 struct Reply
 {
@@ -56,6 +58,7 @@ struct Reply
   /// Get a stock reply.
   static Reply stock_reply(status_type status);
 };
+#pragma GCC diagnostic pop
 
 } // namespace http
 

@@ -23,7 +23,7 @@
 
 #include "GUI/GUI_Interface.h"
 
-SceneMonitor::SceneMonitor(boost::asio::io_service& io_service, GUI_Interface& gui) : io_service(io_service), gui(gui) {
+SceneMonitor::SceneMonitor(boost::asio::io_service& io_service, GUI_Interface& gui) : io_service(io_service), gui(gui), scenes(), scenes_mtx() {
 	//	std::cout << "SceneMonitor() - constructed" << std::endl;
 	gui.createRoom("cameras", boost::bind<const std::string>(&SceneMonitor::getSceneNames, this));
 }

@@ -17,7 +17,10 @@
 
 StreamDirectory::StreamDirectory(boost::asio::io_service& io_service)
 : io_service_(io_service),
-  stream_id(0) {
+  stream_id(0),
+  stream_list_(),
+  stream_list_mtx_()
+  {
 	//	std::cout << "StreamDirectory::StreamDirectory() - constructing" << std::endl;
 }
 

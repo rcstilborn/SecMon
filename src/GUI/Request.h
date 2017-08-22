@@ -14,7 +14,8 @@
 #include "Header.h"
 
 namespace http {
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 /// A request received from a client.
 struct Request
 {
@@ -24,6 +25,7 @@ struct Request
   int http_version_minor;
   std::vector<Header> headers;
 };
+#pragma GCC diagnostic pop
 
 } // namespace http
 

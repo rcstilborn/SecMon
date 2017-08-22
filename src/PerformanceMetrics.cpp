@@ -35,7 +35,8 @@ using namespace boost::placeholders;
 PerformanceMetrics::PerformanceMetrics(boost::asio::io_service& io_service, const int interval)
 : interval(interval),
   timer(io_service, boost::posix_time::milliseconds(interval)),
-  numProcessors(0) {
+  numProcessors(0),
+  lastCPU(), lastSysCPU(), lastUserCPU() {
 
 	this->timer.expires_from_now(boost::posix_time::seconds(this->interval));
 	this->timer.async_wait(boost::bind(&PerformanceMetrics::getNextStats, this, _1));

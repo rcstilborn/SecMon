@@ -16,7 +16,9 @@
 
 Stream::Stream(SceneInterface::image_ready_signal& signal, int stream_id)
 : signal_(signal),
-  stream_id_(stream_id) {
+  stream_id_(stream_id),
+  connection_list_(),
+  connection_list_mtx_() {
 //	std::cout << "Stream::Stream() - constructed with id " << stream_id << std::endl;
 }
 

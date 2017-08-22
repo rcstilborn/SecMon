@@ -15,7 +15,7 @@ const static int SENSITIVITY_VALUE = 20;
 const static int BLUR_SIZE = 10;
 
 
-MovementDetectorBasic::MovementDetectorBasic() {
+MovementDetectorBasic::MovementDetectorBasic(): previousImage() {
 	// TODO Auto-generated constructor stub
 
 }

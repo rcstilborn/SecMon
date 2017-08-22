@@ -23,7 +23,7 @@ public:
 	typedef boost::shared_ptr<std::vector<unsigned char>> image_ptr;
 	typedef boost::signals2::signal<void (image_ptr)>  image_ready_signal;
 	struct Stream {
-		Stream(const std::string& name) : name(name) {}
+		explicit Stream(const std::string& name) : name(name),image_ready() {}
 		const std::string name;
 		image_ready_signal image_ready;
 	};

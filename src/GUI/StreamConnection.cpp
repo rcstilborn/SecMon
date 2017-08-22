@@ -37,7 +37,10 @@ StreamConnection::StreamConnection(http::connection_ptr conn, Stream& stream)
 : strand_(conn->socket().get_io_service()),
   socket_(std::move(conn->socket())),
   stream_(stream),
+  stream_signal_connection_(),
+  buffer_(),
   request_(conn->getRequest()),
+  reply_(),
   outbox_(){
 //	std::cout << "StreamConnection::StreamConnection - constructed - " << stream.getStreamId() << std::endl;
 }
