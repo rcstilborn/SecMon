@@ -3,6 +3,7 @@
 Vagrantfile and Vagrant_setup.sh create an Ubuntu 16.04 box with the required packages
 
 ### Customizations...
+
 #### Vagrantfile:
 
 Change (or remove) the bridged network adaptor to your requirement

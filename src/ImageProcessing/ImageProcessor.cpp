@@ -63,7 +63,7 @@ void ImageProcessor::processFrame(const int frameId) {
 //		bg1.subtractBackground(frame0);
 	//	imbs.apply(frame0->getOriginalImage(),frame0->getNewImage("imbs"));
 
-	if(frameId < 300)
+	if(frameId < 10)
         return;
 
 	roi.processFrame(frame0);

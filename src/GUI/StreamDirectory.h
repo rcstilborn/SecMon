@@ -24,7 +24,7 @@ class Stream;
 class StreamDirectory	: private boost::noncopyable
 {
 public:
-	StreamDirectory(boost::asio::io_service& io_service);
+	explicit StreamDirectory(boost::asio::io_service& io_service);
 	virtual ~StreamDirectory();
 	bool handleValidStream(const std::string& streamRequest, http::connection_ptr conn);
 	void addStream(SceneInterface::Stream& stream);

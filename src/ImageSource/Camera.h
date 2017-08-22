@@ -16,7 +16,7 @@ class Frame;
 
 class Camera {
 public:
-	Camera(const std::string& source);
+	explicit Camera(const std::string& source);
 	virtual ~Camera();
 	bool getNextFrame(cv::Mat& img, cv::Mat& overlay);
 	const std::string& getSourceName() const;

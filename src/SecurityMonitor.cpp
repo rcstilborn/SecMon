@@ -62,7 +62,7 @@ Old data
 
 const int num_threads_in_pool = 4;
 
-void doMenu();
+//void doMenu();
 char getch();
 
 int main (int argc, char * argv[])
@@ -153,16 +153,16 @@ int main (int argc, char * argv[])
 }
 
 
-void doMenu()
-{
-    //	initscr();
-    //	cbreak();
-    //	noecho();
-    //	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-    std::cout << "Press <ENTER> to exit";
-    //	int ch = getch();
-    std::cin.get();
-}
+//void doMenu()
+//{
+//    //	initscr();
+//    //	cbreak();
+//    //	noecho();
+//    //	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+//    std::cout << "Press <ENTER> to exit";
+//    //	int ch = getch();
+//    std::cin.get();
+//}
 
 char getch()
 {

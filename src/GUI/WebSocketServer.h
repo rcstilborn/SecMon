@@ -26,7 +26,7 @@ class SceneMonitor;
 
 class WebSocketServer {
 public:
-	WebSocketServer(boost::asio::io_service& io_service);
+	explicit WebSocketServer(boost::asio::io_service& io_service);
 	virtual ~WebSocketServer();
 
 	void start();

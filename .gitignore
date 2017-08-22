@@ -5,3 +5,5 @@ vagrant-provision.log
 /testbuild/
 /.depend/
 SecMon.cbp
+CppCheckResults.xml
+

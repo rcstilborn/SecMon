@@ -24,7 +24,7 @@ class SceneInterface;
 class GUI_Interface {
 
 public:
-	GUI_Interface(boost::asio::io_service& io_service);
+	explicit GUI_Interface(boost::asio::io_service& io_service);
 	virtual ~GUI_Interface();
 
 	void start();

@@ -14,6 +14,7 @@
 #include "Header.h"
 
 namespace http {
+// I think this came from the Boost::asio demo code.  It will all get refactored away when we move to libsourcey
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 /// A request received from a client.

@@ -152,7 +152,7 @@ void WebSocketServer::sendToRoom(const std::string& roomName, void const * data,
 }
 
 void WebSocketServer::sendToOne(websocketpp::connection_hdl hdl, const std::string& roomName, const std::string& data){
-	room_list::iterator it = findRoom(roomName);
+	//room_list::iterator it = findRoom(roomName);
 
 
 	con_msg_man_type::ptr manager = websocketpp::lib::make_shared<con_msg_man_type>();
