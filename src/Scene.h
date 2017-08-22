@@ -22,26 +22,26 @@ class GUI_Interface;
 
 class Scene : private boost::noncopyable {
 public:
-	Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui, const int fps = 1);
-	virtual ~Scene();
+    Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui, const int fps = 1);
+    virtual ~Scene();
 
-	Camera& getCamera();
-	FrameSequence& getFrameSequence();
-	const std::string& getName() const;
-	void shutdown();
-	void togglePause();
-	void setFPS(const int fps);
+    Camera& getCamera();
+    FrameSequence& getFrameSequence();
+    const std::string& getName() const;
+    void shutdown();
+    void togglePause();
+    void setFPS(const int fps);
 
 private:
-	const std::string& name;
-//	int interval;
-	FrameSequence frameSequence;
-	SceneInterface sceneIf;
-	OOI_Processor ooiProcessor;
-	ImageProcessor imageProcessor;
+    const std::string& name;
+//    int interval;
+    FrameSequence frameSequence;
+    SceneInterface sceneIf;
+    OOI_Processor ooiProcessor;
+    ImageProcessor imageProcessor;
     ImageSource imageSource;
 
-	bool isPaused_ = false;
+    bool isPaused_ = false;
 };
 
 #endif /* SCENE_H_ */

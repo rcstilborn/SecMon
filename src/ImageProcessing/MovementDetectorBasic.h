@@ -15,14 +15,14 @@
 
 class MovementDetectorBasic : public MovementDetector {
 public:
-	MovementDetectorBasic();
-	virtual ~MovementDetectorBasic();
+    MovementDetectorBasic();
+    virtual ~MovementDetectorBasic();
 
-	void processFrame(boost::shared_ptr<Frame> frame0);
+    void processFrame(boost::shared_ptr<Frame> frame0);
 
 private:
-	void searchForMovement(cv::Mat thresholdImage, cv::Mat &cameraFeed);
-	cv::Mat previousImage;
+    void searchForMovement(cv::Mat thresholdImage, cv::Mat &cameraFeed);
+    cv::Mat previousImage;
 
 };
 

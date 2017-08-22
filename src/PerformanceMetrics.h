@@ -16,21 +16,21 @@
 
 class PerformanceMetrics {
 public:
-	PerformanceMetrics(boost::asio::io_service& io_service, const int interval=5);
-	virtual ~PerformanceMetrics();
+    PerformanceMetrics(boost::asio::io_service& io_service, const int interval=5);
+    virtual ~PerformanceMetrics();
 
 private:
-	int interval;
-	boost::asio::deadline_timer timer;
-	int numProcessors;
-	clock_t lastCPU, lastSysCPU, lastUserCPU;
+    int interval;
+    boost::asio::deadline_timer timer;
+    int numProcessors;
+    clock_t lastCPU, lastSysCPU, lastUserCPU;
 
-	size_t getPeakRSS();
-	size_t getCurrentRSS();
-	double getCurrentCPU();
-	void getNextStats(const boost::system::error_code& ec);
-	char last_indicator='/';
-	char getNextIndicator();
+    size_t getPeakRSS();
+    size_t getCurrentRSS();
+    double getCurrentCPU();
+    void getNextStats(const boost::system::error_code& ec);
+    char last_indicator='/';
+    char getNextIndicator();
 };
 
 #endif /* PERFORMANCEMETRICS_H_ */

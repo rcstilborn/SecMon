@@ -26,40 +26,40 @@ class GUI_Interface;
 
 class ImageSource : private boost::noncopyable {
 public:
-	ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next, const int fps = 1);
-	virtual ~ImageSource();
+    ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next, const int fps = 1);
+    virtual ~ImageSource();
 
-	Camera& getCamera();
-	const std::string& getName() const;
-	void shutdown();
-	void togglePause();
+    Camera& getCamera();
+    const std::string& getName() const;
+    void shutdown();
+    void togglePause();
 
-	void setFPS(const int fps);
+    void setFPS(const int fps);
 
 private:
-	// Make sure we can't copy them
-//	Scene(const Scene&);
-//	Scene& operator=(Scene);
+    // Make sure we can't copy them
+//    Scene(const Scene&);
+//    Scene& operator=(Scene);
 
-	const std::string& name;
-	int interval;
-	Camera camera;
+    const std::string& name;
+    int interval;
+    Camera camera;
 
-	SceneInterface& sceneIf;
-	FrameSequence& frameSequence;
+    SceneInterface& sceneIf;
+    FrameSequence& frameSequence;
 
-	boost::function<void (const int)> next;
+    boost::function<void (const int)> next;
 
-	boost::asio::deadline_timer timer;
-	boost::asio::strand strand;
+    boost::asio::deadline_timer timer;
+    boost::asio::strand strand;
 
-	bool shuttingDown;
-	void getNextFrame(const boost::system::error_code& ec);
+    bool shuttingDown;
+    void getNextFrame(const boost::system::error_code& ec);
 
-	void restartTimer();
-	void startTimer();
+    void restartTimer();
+    void startTimer();
 
-	bool isPaused_ = false;
+    bool isPaused_ = false;
 };
 
 #endif /* OOI_PROCESSING_IMAGESOURCE_H_ */

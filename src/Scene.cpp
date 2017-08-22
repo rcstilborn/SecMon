@@ -23,39 +23,39 @@ Scene::Scene(const std::string& name, const std::string& url, boost::asio::io_se
   imageProcessor(io_service, sceneIf, frameSequence, boost::bind(&OOI_Processor::processNextFrame, &ooiProcessor, _1)),
   imageSource(name, url, io_service, sceneIf, frameSequence, boost::bind(&ImageProcessor::processNextFrame, &imageProcessor, _1), fps)
 {
-	DLOG(INFO) << "Scene(" << name << ") - constructed";
+    DLOG(INFO) << "Scene(" << name << ") - constructed";
 }
 
 
 Scene::~Scene() {
-	//	std::cout << "~Scene() - enter" << std::endl;
-	//	std::cout << "~Scene() - destructed " << count << std::endl;
+    //    std::cout << "~Scene() - enter" << std::endl;
+    //    std::cout << "~Scene() - destructed " << count << std::endl;
 }
 
 FrameSequence& Scene::getFrameSequence() {
-	return this->frameSequence;
+    return this->frameSequence;
 }
 
 const std::string& Scene::getName() const {
-	return this->name;
+    return this->name;
 }
 
 void Scene::shutdown() {
-	//	std::cout << "Scene::shutdown() " << name << std::endl;
-	imageSource.shutdown();
+    //    std::cout << "Scene::shutdown() " << name << std::endl;
+    imageSource.shutdown();
 }
 
 void Scene::togglePause() {
-	isPaused_ = !isPaused_;
-	imageSource.togglePause();
-	if(isPaused_)
-		std::cout << "Pausing..." << std::endl;
-	else
-		std::cout << "Resuming..." << std::endl;
+    isPaused_ = !isPaused_;
+    imageSource.togglePause();
+    if(isPaused_)
+        std::cout << "Pausing..." << std::endl;
+    else
+        std::cout << "Resuming..." << std::endl;
 }
 
 void Scene::setFPS(const int fps) {
-	imageSource.setFPS(fps);
-	DLOG(INFO) << "Setting FPS to " << fps;
+    imageSource.setFPS(fps);
+    DLOG(INFO) << "Setting FPS to " << fps;
 }
 

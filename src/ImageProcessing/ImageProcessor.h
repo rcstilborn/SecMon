@@ -25,42 +25,42 @@ class FrameSequence;
 
 class ImageProcessor {
 public:
-	ImageProcessor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next);
-	virtual ~ImageProcessor();
-	void processNextFrame(const int frameId);
+    ImageProcessor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next);
+    virtual ~ImageProcessor();
+    void processNextFrame(const int frameId);
 
 private:
      ImageProcessor(const ImageProcessor&) = delete;
      ImageProcessor& operator=(const ImageProcessor&) = delete;
 
 
-	/// Strand to ensure the connection's handlers are not called concurrently.
-	boost::asio::io_service::strand strand;
+    /// Strand to ensure the connection's handlers are not called concurrently.
+    boost::asio::io_service::strand strand;
 
-	SceneInterface& sceneIf;
-	FrameSequence& frameSequence;
+    SceneInterface& sceneIf;
+    FrameSequence& frameSequence;
 
-	boost::function<void (const int)> next;
+    boost::function<void (const int)> next;
 
-//	SceneInterface::image_ready_signal& main_view_signal;
-//	SceneInterface::image_ready_signal& overlay_view_signal;
-//	SceneInterface::image_ready_signal& debug_view_signal0;
-//	SceneInterface::image_ready_signal& debug_view_signal1;
-//	SceneInterface::image_ready_signal& debug_view_signal2;
+//    SceneInterface::image_ready_signal& main_view_signal;
+//    SceneInterface::image_ready_signal& overlay_view_signal;
+//    SceneInterface::image_ready_signal& debug_view_signal0;
+//    SceneInterface::image_ready_signal& debug_view_signal1;
+//    SceneInterface::image_ready_signal& debug_view_signal2;
 
-	///diff, threshold, diff, blur method
-	MovementDetector* movementDetector = NULL;
+    ///diff, threshold, diff, blur method
+    MovementDetector* movementDetector = NULL;
 
-	/// OpenCV BackgroundSubtractor
-//	BackgroundSubtractorCV bg1;
+    /// OpenCV BackgroundSubtractor
+//    BackgroundSubtractorCV bg1;
 
-	///IMBS Background Subtractor
+    ///IMBS Background Subtractor
 //    BackgroundSubtractorIMBS imbs;
 
     ROI_Detector roi;
 
-	void processFrame(const int frameId);
-//	void signalNewDebugImage(const int signal_id, const std::string& image_name, boost::shared_ptr<Frame> frame);
+    void processFrame(const int frameId);
+//    void signalNewDebugImage(const int signal_id, const std::string& image_name, boost::shared_ptr<Frame> frame);
 
 };
 

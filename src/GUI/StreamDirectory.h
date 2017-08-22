@@ -21,21 +21,21 @@
 
 class Stream;
 
-class StreamDirectory	: private boost::noncopyable
+class StreamDirectory    : private boost::noncopyable
 {
 public:
-	explicit StreamDirectory(boost::asio::io_service& io_service);
-	virtual ~StreamDirectory();
-	bool handleValidStream(const std::string& streamRequest, http::connection_ptr conn);
-	void addStream(SceneInterface::Stream& stream);
-//	void addStream(const std::string& name, boost::signals2::signal<void (boost::shared_ptr<std::vector<unsigned char>>)> signal);
+    explicit StreamDirectory(boost::asio::io_service& io_service);
+    virtual ~StreamDirectory();
+    bool handleValidStream(const std::string& streamRequest, http::connection_ptr conn);
+    void addStream(SceneInterface::Stream& stream);
+//    void addStream(const std::string& name, boost::signals2::signal<void (boost::shared_ptr<std::vector<unsigned char>>)> signal);
 
 private:
-	/// The io_service used to perform asynchronous operations.
-	boost::asio::io_service& io_service_;
-	int stream_id;
-	std::map<const int,boost::shared_ptr<Stream>> stream_list_;
-	boost::mutex stream_list_mtx_;
+    /// The io_service used to perform asynchronous operations.
+    boost::asio::io_service& io_service_;
+    int stream_id;
+    std::map<const int,boost::shared_ptr<Stream>> stream_list_;
+    boost::mutex stream_list_mtx_;
 };
 
 #endif /* GUI_STREAMDIRECTORY_ */

@@ -42,13 +42,13 @@ public:
   /// Start the first asynchronous operation for the connection.
   void start();
 
-	const Request& getRequest() const {
-		return request_;
-	}
+    const Request& getRequest() const {
+        return request_;
+    }
 
-	const Reply& getReply() const {
-		return reply_;
-	}
+    const Reply& getReply() const {
+        return reply_;
+    }
 
 private:
   /// Handle completion of a read operation.
