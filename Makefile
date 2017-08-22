@@ -33,9 +33,10 @@ src/SecurityMonitor.cpp
 
 
 SRCS_T = \
+test/FrameTest.cpp \
 test/ImageProcessing/ROI_DetectorTest.cpp \
-#test/OOI_Processing/OOI_Test.cpp
-#SRCS_T += SRCS
+test/OOI_Processing/OOI_Test.cpp
+
 
 OBJS = $(SRCS:.cpp=.o)
 OBJS_T = $(SRCS_T:.cpp=.o)
@@ -59,7 +60,6 @@ LINKER_FLAGS += -lgflags -lglog -lopenblas
 
 TSTLINKER_FLAGS = $(LINKER_FLAGS) -l:gtest_main.a
 
-#TSTLINKER_FLAGS = $(LINKER_FLAGS) -lgtest -lgtest_main
 
 #
 # Debug build settings
@@ -149,8 +149,6 @@ test: $(TSTEXE)
 
 $(TSTEXE): $(TSTOBJS)
 	$(CXX) $(CXXFLAGS) -o $(TSTEXE) $^ $(TSTLINKER_FLAGS)
-#g++ -isystem ../include -g -Wall -Wextra -pthread -lpthread sample1.o sample1_unittest.o gtest_main.a 
-
 
 $(TSTDIR)/%.o: %.cpp $(TSTDEPDIR)/%.d
 	mkdir -p $(dir $@)

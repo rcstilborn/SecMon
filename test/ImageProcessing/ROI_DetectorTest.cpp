@@ -11,28 +11,28 @@
 #include "../../src/ImageProcessing/ROI_Detector.h"
 
 
-TEST(IsInsideTest, Inside) {
+TEST(ROI_Detector_IsInsideTest, Inside) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect large(8,8,20,20);
 	EXPECT_TRUE(rd.isInside(small, large));
 }
 
-TEST(IsInsideTest, Outside) {
+TEST(ROI_Detector_IsInsideTest, Outside) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect large(8,8,20,20);
 	EXPECT_FALSE(rd.isInside(large, small));
 }
 
-TEST(IsInsideTest, Same) {
+TEST(ROI_Detector_IsInsideTest, Same) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect large(10,10,10,10);
 	EXPECT_TRUE(rd.isInside(large, small));
 }
 
-TEST(ConsolidateRectangles, OneNested) {
+TEST(ROI_Detector_ConsolidateRectangles, OneNested) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect large(8,8,20,20);
@@ -42,7 +42,7 @@ TEST(ConsolidateRectangles, OneNested) {
 	EXPECT_EQ(1, v.size());
 }
 
-TEST(ConsolidateRectangles, OneNestedOneNot) {
+TEST(ROI_Detector_ConsolidateRectangles, OneNestedOneNot) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect large(8,8,20,20);
@@ -53,7 +53,7 @@ TEST(ConsolidateRectangles, OneNestedOneNot) {
 	EXPECT_EQ(2, v.size());
 }
 
-TEST(ConsolidateRectangles, TwoNested) {
+TEST(ROI_Detector_ConsolidateRectangles, TwoNested) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect small2(82,82,11,11);
@@ -67,7 +67,7 @@ TEST(ConsolidateRectangles, TwoNested) {
 	EXPECT_EQ(large2,*(std::find(v.begin(),v.end(),large2)));
 }
 
-TEST(ConsolidateRectangles, TwoNestedOneTheSame) {
+TEST(ROI_Detector_ConsolidateRectangles, TwoNestedOneTheSame) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect small2(82,82,11,11);
@@ -82,7 +82,7 @@ TEST(ConsolidateRectangles, TwoNestedOneTheSame) {
 	EXPECT_EQ(large3,*(std::find(v.begin(),v.end(),large3)));
 }
 
-TEST(ConsolidateRectangles, None) {
+TEST(ROI_Detector_ConsolidateRectangles, None) {
 	ROI_Detector rd;
 	std::vector<cv::Rect> v;
 	rd.consolidateRectangles(v);
@@ -90,7 +90,7 @@ TEST(ConsolidateRectangles, None) {
 	EXPECT_EQ(0, v.size());
 }
 
-TEST(ConsolidateRectangles, One) {
+TEST(ROI_Detector_ConsolidateRectangles, One) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	std::vector<cv::Rect> v = {small};
@@ -99,7 +99,7 @@ TEST(ConsolidateRectangles, One) {
 	EXPECT_EQ(1, v.size());
 }
 
-TEST(ConsolidateRectangles, 50Overlap) {
+TEST(ROI_Detector_ConsolidateRectangles, 50Overlap) {
 	ROI_Detector rd;
 	cv::Rect small(20,0, 10, 10);
 	cv::Rect large(10,10,30,30);
@@ -110,7 +110,7 @@ TEST(ConsolidateRectangles, 50Overlap) {
 	EXPECT_EQ(2, v.size());
 }
 
-TEST(ConsolidateRectangles, 80Overlap) {
+TEST(ROI_Detector_ConsolidateRectangles, 80Overlap) {
 	ROI_Detector rd;
 	cv::Rect small(20,8, 10, 10);
 	cv::Rect large(10,10,30,30);
@@ -121,7 +121,7 @@ TEST(ConsolidateRectangles, 80Overlap) {
 	EXPECT_EQ(2, v.size());
 }
 
-TEST(ConsolidateRectangles, 90Overlap) {
+TEST(ROI_Detector_ConsolidateRectangles, 90Overlap) {
 	ROI_Detector rd;
 	cv::Rect small(20,9, 10, 10);
 	cv::Rect large(10,10,30,30);
@@ -134,21 +134,21 @@ TEST(ConsolidateRectangles, 90Overlap) {
 	EXPECT_EQ(1, v.size());
 }
 
-TEST(OverlapPercentage, Half) {
+TEST(ROI_Detector_OverlapPercentage, Half) {
 	ROI_Detector rd;
 	cv::Rect small(10,10,10,10);
 	cv::Rect large(10,15,10,10);
 	EXPECT_EQ(50, rd.overlapPercentage(small, large));
 }
 
-TEST(OverlapPercentage, Quarter) {
+TEST(ROI_Detector_OverlapPercentage, Quarter) {
 	ROI_Detector rd;
 	cv::Rect small(5,5,10,10);
 	cv::Rect large(10,10,10,10);
 	EXPECT_EQ(25, rd.overlapPercentage(small, large));
 }
 
-TEST(OverlapPercentage, None) {
+TEST(ROI_Detector_OverlapPercentage, None) {
 	ROI_Detector rd;
 	cv::Rect small(5,5,4,4);
 	cv::Rect large(10,10,10,10);
