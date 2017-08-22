@@ -6,4 +6,8 @@ vagrant-provision.log
 /.depend/
 SecMon.cbp
 CppCheckResults.xml
+.cproject
+.project
+.settings/
+SecMon.layout
 
