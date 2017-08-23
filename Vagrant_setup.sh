@@ -41,6 +41,13 @@ sudo add-apt-repository ppa:jonathonf/ffmpeg-3
 sudo apt-get update
 sudo apt-get install -y ffmpeg libav-tools x264 x265
 
+# Install Oracle Java 8
+sudo add-apt-repository -y ppa:webupd8team/java
+sudo apt-get update
+echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections 
+echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+sudo apt-get -y install oracle-java8-installer
+
 
 # install boost
 if [ ! -d /usr/include/boost ]
