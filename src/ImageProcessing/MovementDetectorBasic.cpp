@@ -1,86 +1,81 @@
 /*
- * ROIDetector.cpp
+ * MovementDetectorBasic.cpp
  *
  *  Created on: Aug 14, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #include "MovementDetectorBasic.h"
-
+#include <vector>
 #include "../Frame.h"
 
 //our sensitivity value to be used in the absdiff() function
-const static int SENSITIVITY_VALUE = 20;
+static const int kSensitivityValue = 20;
 //size of blur used to smooth the intensity image output from absdiff() function
-const static int BLUR_SIZE = 10;
+static const int kBlurSize = 10;
 
 
-MovementDetectorBasic::MovementDetectorBasic(): previousImage() {
-    // TODO Auto-generated constructor stub
-
+MovementDetectorBasic::MovementDetectorBasic()
+    : previous_image_() {
 }
 
 MovementDetectorBasic::~MovementDetectorBasic() {
-    // TODO Auto-generated destructor stub
 }
 
-void MovementDetectorBasic::processFrame(boost::shared_ptr<Frame> frame0) {
+void MovementDetectorBasic::process_frame(boost::shared_ptr<Frame> frame0) {
+  //set up the matrices that we will need
+  //the two frames we will be comparing
+  cv::Mat& img0 = frame0->get_original_image();
 
-    //set up the matrices that we will need
-    //the two frames we will be comparing
-    cv::Mat& img0 = frame0->getOriginalImage();
-
-    //grayscale image (needed for absdiff() function)
-    cv::Mat grayImage0;// = frame0->getNewImage("gray");
+  //grayscale image (needed for absdiff() function)
+  cv::Mat grayImage0;    // = frame0->getNewImage("gray");
 //    if (grayImage0.empty())
-        cv::cvtColor(img0,grayImage0,cv::COLOR_BGR2GRAY);
+  cv::cvtColor(img0, grayImage0, cv::COLOR_BGR2GRAY);
 
-    // Test for a previous frame.
-    if(previousImage.empty()) {
-        previousImage = grayImage0;
-//        std::cout << "Waiting for second image" << std::endl;
-        return;
-    }
+  // Test for a previous frame.
+  if (previous_image_.empty()) {
+    previous_image_ = grayImage0;
+    return;
+  }
 
-    cv::Mat grayImage1 = previousImage;
-    previousImage = grayImage0;
+  cv::Mat grayImage1 = previous_image_;
+  previous_image_ = grayImage0;
 
-    //resulting difference image
-    cv::Mat& differenceImage = frame0->getNewImage("difference");
-    //thresholded difference image (for use in findContours() function)
-    cv::Mat& foregroundImage = frame0->getNewImage("foreground");
+  //resulting difference image
+  cv::Mat& differenceImage = frame0->get_new_image("difference");
+  //thresholded difference image (for use in findContours() function)
+  cv::Mat& foregroundImage = frame0->get_new_image("foreground");
 
-    //perform frame differencing with the sequential images. This will output an "intensity image"
-    //do not confuse this with a threshold image, we will need to perform thresholding afterwards.
-    cv::absdiff(grayImage0,grayImage1,differenceImage);
-    //threshold intensity image at a given sensitivity value
-    cv::threshold(differenceImage, foregroundImage,SENSITIVITY_VALUE,255,cv::THRESH_BINARY);
+  //perform frame differencing with the sequential images. This will output an "intensity image"
+  //do not confuse this with a threshold image, we will need to perform thresholding afterwards.
+  cv::absdiff(grayImage0, grayImage1, differenceImage);
+  //threshold intensity image at a given sensitivity value
+  cv::threshold(differenceImage, foregroundImage, kSensitivityValue, 255, cv::THRESH_BINARY);
 
+  std::vector<std::vector<cv::Point> > v;
+  std::vector<cv::Vec4i> hierarchy;
+  cv::findContours(foregroundImage, v, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+  foregroundImage = cv::Scalar(0, 0, 0);
+  for (size_t i = 0; i < v.size(); ++i) {
+    // drop smaller blobs
+    if (cv::contourArea(v[i]) < 5)
+      continue;
+    // draw filled blob
+    cv::drawContours(foregroundImage, v, i, cv::Scalar(255, 0, 0), CV_FILLED, 8, hierarchy, 0, cv::Point());
+  }
 
-    std::vector<std::vector<cv::Point> > v;
-    std::vector<cv::Vec4i> hierarchy;
-    cv::findContours( foregroundImage, v, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    foregroundImage = cv::Scalar(0, 0, 0);
-    for ( size_t i=0; i < v.size(); ++i )
-    {
-        // drop smaller blobs
-        if (cv::contourArea(v[i]) < 5)
-            continue;
-        // draw filled blob
-        cv::drawContours(foregroundImage, v, i, cv::Scalar(255,0,0), CV_FILLED, 8, hierarchy, 0, cv::Point() );
-    }
+  cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(25, 25));
+  cv::morphologyEx(foregroundImage, foregroundImage, cv::MORPH_CLOSE, element);
 
-    cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(25, 25));
-    cv::morphologyEx(foregroundImage, foregroundImage, cv::MORPH_CLOSE, element);
-
-
-    //blur the image to get rid of the noise. This will output an intensity image
+  //blur the image to get rid of the noise. This will output an intensity image
 //    cv::blur(foregroundImage,foregroundImage,cv::Size(BLUR_SIZE,BLUR_SIZE));
-    //threshold again to obtain binary image from blur output
+  //threshold again to obtain binary image from blur output
 //    cv::threshold(foregroundImage,foregroundImage,SENSITIVITY_VALUE,255,cv::THRESH_BINARY);
-    //search for contours in our thresholded image
+  //search for contours in our thresholded image
 //    searchForMovement(foregroundImage,img0);
-
 }
 
 //void MovementDetectorBasic::searchForMovement(cv::Mat thresholdImage, cv::Mat &cameraFeed){

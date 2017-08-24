@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 8, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef GUI_REPLY_H_
@@ -19,11 +22,9 @@ namespace http {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 /// A reply to be sent to a client.
-struct Reply
-{
+struct Reply {
   /// The status of the reply.
-  enum status_type
-  {
+  enum status_type {
     ok = 200,
     created = 201,
     accepted = 202,
@@ -60,6 +61,6 @@ struct Reply
 };
 #pragma GCC diagnostic pop
 
-} // namespace http
+}  // namespace http
 
-#endif /* GUI_REPLY_H_ */
+#endif // GUI_REPLY_H_

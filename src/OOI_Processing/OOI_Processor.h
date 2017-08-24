@@ -3,6 +3,9 @@
  *
  *  Created on: Oct 23, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef OOI_PROCESSING_OOI_PROCESSOR_H_
@@ -17,33 +20,32 @@
 #include <map>
 
 #include "OOI.h"
-//#include "Classifier.h"
 
 class SceneInterface;
 class FrameSequence;
 class Frame;
 
-class OOI_Processor  : private boost::noncopyable {
-public:
-    OOI_Processor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next);
-    virtual ~OOI_Processor();
-    void processNextFrame(const int frameId);
-    void classifyThis(boost::shared_ptr<Frame> frame0, OOI* newOOI);
+class OOI_Processor : private boost::noncopyable {
+ public:
+  OOI_Processor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence,
+                boost::function<void(const int)> next);
+  virtual ~OOI_Processor();
+  void process_next_frame(const int frameId);
+  void classify_this(boost::shared_ptr<Frame> frame0, OOI* newOOI);
 
-private:
-    /// Strand to ensure the connection's handlers are not called concurrently.
-    boost::asio::io_service::strand strand;
+ private:
+  /// Strand to ensure the connection's handlers are not called concurrently.
+  boost::asio::io_service::strand strand_;
 //    Classifier caffeClassifier;
 
-    SceneInterface& sceneIf;
-    FrameSequence& frameSequence;
-    boost::function<void (const int)> next;
-    unsigned int nextOoiId = 0;
-    std::map<unsigned int, boost::shared_ptr<OOI>> ooiList;
-    void processFrame(const int frameId);
-    void createNewOOI(std::vector<cv::Rect>::iterator rois_it,
-            const int frameId, const boost::shared_ptr<Frame>& frame0,
-            int& newOOIs, std::vector<cv::Rect>& rois);
+  SceneInterface& scene_interface_;
+  FrameSequence& frame_sequence_;
+  boost::function<void(const int)> next_;
+  unsigned int next_ooi_id_ = 0;
+  std::map<unsigned int, boost::shared_ptr<OOI>> ooi_list_;
+  void process_frame(const int frameId);
+  void create_new_ooi(std::vector<cv::Rect>::iterator rois_it, const int frameId,
+                      const boost::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois);
 };
 
-#endif /* OOI_PROCESSING_OOI_PROCESSOR_H_ */
+#endif // OOI_PROCESSING_OOI_PROCESSOR_H_

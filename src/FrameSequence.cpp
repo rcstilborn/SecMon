@@ -3,6 +3,9 @@
  *
  *  Created on: Jul 27, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #include "FrameSequence.h"
@@ -18,87 +21,69 @@
 #include "Frame.h"
 
 FrameSequence::FrameSequence()
-: current_frame_id_(0), frames(), frame_list_mtx() {
-    //VLOG(1) << "FrameSequence() - constructed";
+    : current_frame_id_(0),
+      frames_(),
+      frame_list_mtx_() {
 }
 
-//FrameSequence::FrameSequence(const int width, const int height)
-//: current_frame_id_(0),
-//  width_(width),
-//  height_(height) {
-//    //    std::cout << "FrameSequence() - constructed" << std::endl;
-//}
-
 FrameSequence::~FrameSequence() {
-    //    std::cout << "~FrameSequence() - deleting frames" << std::endl;
-    boost::lock_guard<boost::mutex> guard(frame_list_mtx);
-    while(!this->frames.empty()){
-        this->frames.erase(this->frames.begin());
-    }
-    //VLOG(1) << "~FrameSequence() - destructed";
+  boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
+  while (!this->frames_.empty()) {
+    this->frames_.erase(this->frames_.begin());
+  }
 }
 
 void FrameSequence::setSize(const int width, const int height) {
-    width_ = width;
-    height_ = height;
+  width_ = width;
+  height_ = height;
 }
 
-boost::shared_ptr<Frame> FrameSequence::getNewFrame(){
-    //    std::cout << "FrameSequence.getNewFrame() - enter" << std::endl;
-    const int frame_id = current_frame_id_++;
-    boost::shared_ptr<Frame> newFrame(new Frame(frame_id, width_, height_));
-    {
-        boost::lock_guard<boost::mutex> guard(frame_list_mtx);
-        this->frames.insert(std::pair<const int,boost::shared_ptr<Frame>>(frame_id, newFrame));
-    }
-    if (frames.size() > frame_maximum) {
-        //        std::cerr << "FrameSequence::getNewFrame() - Warning! More than " << frame_maximum << " frames in queue! Deleting one now!" << std::endl;
-        deleteEarliestFrame();
-    }
-    //    else if (frames.size() > frame_warning_level) {
-    //        std::cerr << "FrameSequence::getNewFrame() - Warning! More than " << frame_warning_level << " frames in queue!" << std::endl;
-    //    }
-    //    std::cout << "FrameSequence.getNewFrame() - exit" << std::endl;
-    return newFrame;
+boost::shared_ptr<Frame> FrameSequence::get_new_frame() {
+  const int frame_id = current_frame_id_++;
+  boost::shared_ptr<Frame> newFrame(new Frame(frame_id, width_, height_));
+  {
+    boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
+    this->frames_.insert(std::pair<const int, boost::shared_ptr<Frame>>(frame_id, newFrame));
+  }
+  if (frames_.size() > frame_maximum) {
+    delete_earliest_frame();
+  }
+  return newFrame;
 }
 
-void FrameSequence::deleteFrame(const int frame_id) {
-    boost::lock_guard<boost::mutex> guard(frame_list_mtx);
-    auto it = frames.find(frame_id);
-    if (it == frames.end())
-        return;
-    frames.erase(it);
-    //    std::cout << "FrameSequence.deleteLastFrame() - exit" << std::endl;
+void FrameSequence::delete_frame(const int frame_id) {
+  boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
+  auto it = frames_.find(frame_id);
+  if (it == frames_.end())
+    return;
+  frames_.erase(it);
 }
 
-boost::shared_ptr<Frame> FrameSequence::getFrame(const int frame_id){
-    boost::lock_guard<boost::mutex> guard(frame_list_mtx);
-    auto it = frames.find(frame_id);
-    if (it == frames.end())
-        throw std::invalid_argument("No such frame");
-    return it->second;
-    //    std::cout << "FrameSequence.deleteLastFrame() - exit" << std::endl;
+boost::shared_ptr<Frame> FrameSequence::get_frame(const int frame_id) {
+  boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
+  auto it = frames_.find(frame_id);
+  if (it == frames_.end())
+    throw std::invalid_argument("No such frame");
+  return it->second;
 }
 
-std::vector<boost::shared_ptr<Frame>> FrameSequence::getFrameList(const int frame_id, const int listSize) {
-    boost::lock_guard<boost::mutex> guard(frame_list_mtx);
-    std::vector<boost::shared_ptr<Frame>> frameList;
-    auto it = frames.find(frame_id);
-    if (it == frames.end())
-        throw std::invalid_argument("No such frame");
+std::vector<boost::shared_ptr<Frame>> FrameSequence::get_frame_list(const int frame_id, const int listSize) {
+  boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
+  std::vector<boost::shared_ptr<Frame>> frameList;
+  auto it = frames_.find(frame_id);
+  if (it == frames_.end())
+    throw std::invalid_argument("No such frame");
+  frameList.push_back(it->second);
+  for (int i = 0; i < listSize; i++) {
+    if (--it == frames_.begin())
+      break;
     frameList.push_back(it->second);
-    for (int i = 0; i < listSize; i++) {
-        if(--it == frames.begin())
-            break;
-        frameList.push_back(it->second);
-    }
-    return frameList;
+  }
+  return frameList;
 }
 
-void FrameSequence::deleteEarliestFrame() {
-    boost::lock_guard<boost::mutex> guard(frame_list_mtx);
-    //    std::cout << "FrameSequence.deleteEarliestFrame() - enter" << std::endl;
-    if(!frames.empty())
-        frames.erase(frames.begin());
-    //    std::cout << "FrameSequence.deleteEarliestFrame() - exit" << std::endl;
+void FrameSequence::delete_earliest_frame() {
+  boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
+  if (!frames_.empty())
+    frames_.erase(frames_.begin());
 }

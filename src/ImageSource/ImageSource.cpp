@@ -3,6 +3,9 @@
  *
  *  Created on: Oct 23, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #include "ImageSource.h"
@@ -24,117 +27,119 @@
 #include <glog/logging.h>
 #include <exception>
 #include <iostream>
+#include <string>
 
 #include "../Frame.h"
 #include "../FrameSequence.h"
 
-ImageSource::ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next, const int fps)
-: name(name),
-  interval(1000/fps),
-  camera(url),
-  sceneIf(sceneIf),
-  frameSequence(frameSequence),
-  next(next),
-  timer(io_service, boost::posix_time::milliseconds(interval)),
-  strand(io_service),
-  shuttingDown(false)
-{
-    DLOG(INFO) << "ImageSource(" << name << ") - constructed";
-    frameSequence.setSize(camera.getWidth(), camera.getHeight());
-    //    gui.registerNewScene(sceneIf);
-    // Reset and start the timer
-    startTimer();
+ImageSource::ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service,
+                         SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void(const int)> next,
+                         const int fps)
+    : name_(name),
+      interval_(1000 / fps),
+      camera_(url),
+      scene_interface_(sceneIf),
+      frame_sequence_(frameSequence),
+      next_(next),
+      timer_(io_service, boost::posix_time::milliseconds(interval_)),
+      strand_(io_service),
+      shutting_down_(false) {
+  DLOG(INFO)<< "ImageSource(" << name << ") - constructed";
+  frameSequence.setSize(camera_.get_width(), camera_.get_height());
+  //    gui.registerNewScene(sceneIf);
+  // Reset and start the timer
+  start_timer();
 }
 
-void ImageSource::startTimer() {
-    if(shuttingDown) return;
-    // Reset the timer from now (restarting the camera takes time)
-    this->timer.expires_from_now(boost::posix_time::milliseconds(this->interval));
-    this->timer.async_wait(strand.wrap(boost::bind(&ImageSource::getNextFrame, this, _1)));
+void ImageSource::start_timer() {
+  if (shutting_down_)
+    return;
+  // Reset the timer from now (restarting the camera takes time)
+  this->timer_.expires_from_now(boost::posix_time::milliseconds(this->interval_));
+  this->timer_.async_wait(strand_.wrap(boost::bind(&ImageSource::get_next_frame, this, _1)));
 }
 
-void ImageSource::restartTimer() {
-    if(shuttingDown) return;
-    // Reset the timer
-    this->timer.expires_at(this->timer.expires_at()    + boost::posix_time::milliseconds(this->interval));
-    this->timer.async_wait(    strand.wrap(boost::bind(&ImageSource::getNextFrame, this, _1)));
+void ImageSource::restart_timer() {
+  if (shutting_down_)
+    return;
+  // Reset the timer
+  this->timer_.expires_at(this->timer_.expires_at() + boost::posix_time::milliseconds(this->interval_));
+  this->timer_.async_wait(strand_.wrap(boost::bind(&ImageSource::get_next_frame, this, _1)));
 }
 
-void ImageSource::getNextFrame(const boost::system::error_code& ec) {
-    //    std::cout << "ImageSource::getNextFrame() \"" << name << "\" - enter at " << boost::posix_time::microsec_clock::local_time() << std::endl;
+void ImageSource::get_next_frame(const boost::system::error_code& ec) {
+  // Check for errors.
+  if (ec) {
+    return;
+  }
 
-    // Check for errors.
-    if(ec) {
-        //        std::cout << "ImageSource::getNextFrame() \"" << name << "\" - timer cancelled " << ec.message() << std::endl;
+  // Check for paused
+  if (is_paused_) {
+    restart_timer();
+    return;
+  }
+  boost::shared_ptr<Frame> frame = frame_sequence_.get_new_frame();
+  try {
+    if (!this->camera_.get_next_frame(frame->get_original_image(), frame->get_original_image())) {
+      LOG(WARNING)<< "ImageSource::getNextFrame() \"" << name_ << ""
+          "\" - camera returned false so restarting at " << boost::posix_time::microsec_clock::local_time();
+      this->camera_.restart();
+
+      // Try the camera again
+      if (!this->camera_.get_next_frame(frame->get_original_image(), frame->get_original_image())) {
+        // If it fails again then abort - delete the last frame and don't restart the timer
+        LOG(WARNING) << "ImageSource::getNextFrame() \"" << name_ <<
+            "\" - Camera failed to read after re-start.  Abort.";
+        frame_sequence_.delete_frame(frame->get_frame_id());
         return;
+      }
+      // Reset the timer from now (restarting the camera takes time)
+      start_timer();
+    } else {
+      // Reset the timer
+      restart_timer();
     }
+  } catch(std::exception& e) {
+    LOG(WARNING) << "ImageSource::getNextFrame() \"" << name_ << "\" - caught exception from camera " << e.what();
+    frame_sequence_.delete_frame(frame->get_frame_id());
+    return;
+  }
 
-    // Check for paused
-    if(isPaused_) {
-        restartTimer();
-        return;
-    }
-    boost::shared_ptr<Frame> frame = frameSequence.getNewFrame();
-    try {
-        if(!this->camera.getNextFrame(frame->getOriginalImage(), frame->getOverlayImage())) {
-            LOG(WARNING) << "ImageSource::getNextFrame() \"" << name << "\" - camera returned false so restarting at " << boost::posix_time::microsec_clock::local_time();
-            this->camera.restart();
+  // Check the frame isn't empty
+  if (frame->get_original_image().empty()) {
+    LOG(WARNING)<< "Empty frame!!!";
+    frame_sequence_.delete_frame(frame->get_frame_id());
+    return;
+  }
 
-            // Try the camera again
-            if(!this->camera.getNextFrame(frame->getOriginalImage(), frame->getOverlayImage())) {
-                // If it fails again then abort - delete the last frame and don't restart the timer
-                LOG(WARNING) << "ImageSource::getNextFrame() \"" << name << "\" - Camera failed to read after re-start.  Abort.";
-                frameSequence.deleteFrame(frame->getFrameId());
-                return;
-            }
-            // Reset the timer from now (restarting the camera takes time)
-            startTimer();
-        } else {
-            // Reset the timer
-            restartTimer();
-        }
-    } catch(std::exception& e) {
-        LOG(WARNING) << "ImageSource::getNextFrame() \"" << name << "\" - caught exception from camera " << e.what();
-        frameSequence.deleteFrame(frame->getFrameId());
-        return;
-
-    }
-
-    // Check the frame isn't empty
-    if(frame->getOriginalImage().empty()) {
-        LOG(WARNING) << "Empty frame!!!";
-        frameSequence.deleteFrame(frame->getFrameId());
-        return;
-    }
-
-    next(frame->getFrameId());
-    //    std::cout << "Scene::getNextFrame() - exit" << std::endl;
+  next_(frame->get_frame_id());
+  //    std::cout << "Scene::getNextFrame() - exit" << std::endl;
 }
 
 ImageSource::~ImageSource() {
-    //    std::cout << "~ImageSource() - enter" << std::endl;
-    /*int count = */timer.cancel();
-    //    std::cout << "~ImageSource() - destructed " << count << std::endl;
+  //    std::cout << "~ImageSource() - enter" << std::endl;
+  /*int count = */timer_.cancel();
+  //    std::cout << "~ImageSource() - destructed " << count << std::endl;
 }
 
-Camera& ImageSource::getCamera() {
-    return this->camera;
+Camera& ImageSource::get_camera() {
+  return this->camera_;
 }
 
-const std::string& ImageSource::getName() const {
-    return this->name;
+const std::string& ImageSource::get_name() const {
+  return this->name_;
 }
 
 void ImageSource::shutdown() {
-    //    std::cout << "Scene::shutdown() " << name << std::endl;
-    shuttingDown = true;
-    timer.cancel();
+  //    std::cout << "Scene::shutdown() " << name << std::endl;
+  shutting_down_ = true;
+  timer_.cancel();
 }
 
-void ImageSource::togglePause() {
-    isPaused_ = !isPaused_;
+void ImageSource::toggle_pause() {
+  is_paused_ = !is_paused_;
 }
 
-void ImageSource::setFPS(const int fps)  {
-    interval = 1000/fps;
+void ImageSource::set_frames_per_second(const int fps) {
+  interval_ = 1000 / fps;
 }

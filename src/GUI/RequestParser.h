@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 8, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef GUI_REQUESTPARSER_H_
@@ -17,9 +20,8 @@ namespace http {
 struct Request;
 
 /// Parser for incoming requests.
-class RequestParser
-{
-public:
+class RequestParser {
+ public:
   /// Construct ready to parse the request method.
   RequestParser();
 
@@ -30,12 +32,9 @@ public:
   /// has been parsed, false if the data is invalid, indeterminate when more
   /// data is required. The InputIterator return value indicates how much of the
   /// input has been consumed.
-  template <typename InputIterator>
-  boost::tuple<boost::tribool, InputIterator> parse(Request& req,
-      InputIterator begin, InputIterator end)
-  {
-    while (begin != end)
-    {
+  template<typename InputIterator>
+  boost::tuple<boost::tribool, InputIterator> parse(Request& req, InputIterator begin, InputIterator end) {
+    while (begin != end) {
       boost::tribool result = consume(req, *begin++);
       if (result || !result)
         return boost::make_tuple(result, begin);
@@ -44,7 +43,7 @@ public:
     return boost::make_tuple(result, begin);
   }
 
-private:
+ private:
   /// Handle the next character of input.
   boost::tribool consume(Request& req, char input);
 
@@ -61,8 +60,7 @@ private:
   static bool is_digit(int c);
 
   /// The current state of the parser.
-  enum state
-  {
+  enum state {
     method_start,
     method,
     uri,
@@ -86,6 +84,6 @@ private:
   } state_;
 };
 
-} // namespace http
+}  // namespace http
 
-#endif /* GUI_REQUESTPARSER_H_ */
+#endif // GUI_REQUESTPARSER_H_

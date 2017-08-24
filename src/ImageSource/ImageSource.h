@@ -3,10 +3,13 @@
  *
  *  Created on: Oct 23, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
-#ifndef OOI_PROCESSING_IMAGESOURCE_H_
-#define OOI_PROCESSING_IMAGESOURCE_H_
+#ifndef IMAGESOURCE_IMAGESOURCE_H_
+#define IMAGESOURCE_IMAGESOURCE_H_
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/strand.hpp>
@@ -25,41 +28,43 @@ class SceneInterface;
 class GUI_Interface;
 
 class ImageSource : private boost::noncopyable {
-public:
-    ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next, const int fps = 1);
-    virtual ~ImageSource();
+ public:
+  ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service,
+              SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void(const int)> next,
+              const int fps = 1);
+  virtual ~ImageSource();
 
-    Camera& getCamera();
-    const std::string& getName() const;
-    void shutdown();
-    void togglePause();
+  Camera& get_camera();
+  const std::string& get_name() const;
+  void shutdown();
+  void toggle_pause();
 
-    void setFPS(const int fps);
+  void set_frames_per_second(const int fps);
 
-private:
-    // Make sure we can't copy them
+ private:
+  // Make sure we can't copy them
 //    Scene(const Scene&);
 //    Scene& operator=(Scene);
 
-    const std::string& name;
-    int interval;
-    Camera camera;
+  const std::string& name_;
+  int interval_;
+  Camera camera_;
 
-    SceneInterface& sceneIf;
-    FrameSequence& frameSequence;
+  SceneInterface& scene_interface_;
+  FrameSequence& frame_sequence_;
 
-    boost::function<void (const int)> next;
+  boost::function<void(const int)> next_;
 
-    boost::asio::deadline_timer timer;
-    boost::asio::strand strand;
+  boost::asio::deadline_timer timer_;
+  boost::asio::strand strand_;
 
-    bool shuttingDown;
-    void getNextFrame(const boost::system::error_code& ec);
+  bool shutting_down_;
+  void get_next_frame(const boost::system::error_code& ec);
 
-    void restartTimer();
-    void startTimer();
+  void restart_timer();
+  void start_timer();
 
-    bool isPaused_ = false;
+  bool is_paused_ = false;
 };
 
-#endif /* OOI_PROCESSING_IMAGESOURCE_H_ */
+#endif // IMAGESOURCE_IMAGESOURCE_H_

@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 8, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef GUI_HTTP_SERVER_H_
@@ -20,17 +23,15 @@
 namespace http {
 
 /// The top-level class of the HTTP server.
-class HTTP_Server
-  : private boost::noncopyable
-{
-public:
+class HTTP_Server : private boost::noncopyable {
+ public:
   /// Construct the server to listen on the specified TCP address and port, and
   /// serve up files from the given directory.
   explicit HTTP_Server(boost::asio::io_service& io_service, StreamDirectory& streamDirectory);
 
   void start();
 
-private:
+ private:
   /// Initiate an asynchronous accept operation.
   void start_accept();
 
@@ -53,6 +54,6 @@ private:
   RequestHandler request_handler_;
 };
 
-} // namespace http
+}  // namespace http
 
-#endif /* GUI_HTTP_SERVER_H_ */
+#endif // GUI_HTTP_SERVER_H_

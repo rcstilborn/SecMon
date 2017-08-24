@@ -3,6 +3,9 @@
  *
  *  Created on: Oct 23, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #include "OOI_Processor.h"
@@ -14,54 +17,52 @@
 #include <glog/logging.h>
 #include <exception>
 #include <iostream>
+#include <vector>
 
 #include "../Frame.h"
 #include "../FrameSequence.h"
 
 //static int VERY_CLOSE = 90;
 
-OOI_Processor::OOI_Processor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next)
-: strand(io_service),
+OOI_Processor::OOI_Processor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence,
+                             boost::function<void(const int)> next)
+    : strand_(io_service),
 //  caffeClassifier("/usr/local/caffe-master/models/bvlc_reference_caffenet/deploy.prototxt",
 //          "/usr/local/caffe-master/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel",
 //          "/usr/local/caffe-master/data/ilsvrc12/imagenet_mean.binaryproto",
 //          "/usr/local/caffe-master/data/ilsvrc12/synset_words.txt"),
-          sceneIf(sceneIf),
-          frameSequence(frameSequence),
-          next(next),
-          ooiList(){
-    // TODO Auto-generated constructor stub
-
+      scene_interface_(sceneIf),
+      frame_sequence_(frameSequence),
+      next_(next),
+      ooi_list_() {
 }
 
 OOI_Processor::~OOI_Processor() {
-    // TODO Auto-generated destructor stub
 }
 
-void OOI_Processor::processNextFrame(const int frameId) {
-    strand.post(boost::bind(&OOI_Processor::processFrame, this, frameId));
+void OOI_Processor::process_next_frame(const int frameId) {
+  strand_.post(boost::bind(&OOI_Processor::process_frame, this, frameId));
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-void OOI_Processor::createNewOOI(std::vector<cv::Rect>::iterator rois_it,
-        const int frameId, const boost::shared_ptr<Frame>& frame0, int& newOOIs,
-        std::vector<cv::Rect>& rois) {
-    boost::shared_ptr<OOI> newOOI(new OOI(nextOoiId++, *rois_it, frameId));
+void OOI_Processor::create_new_ooi(std::vector<cv::Rect>::iterator rois_it, const int frameId,
+                                   const boost::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois) {
+  boost::shared_ptr<OOI> newOOI(new OOI(next_ooi_id_++, *rois_it, frameId));
 //    classifyThis(frame0, newOOI);
-    ooiList.insert({newOOI->getId(), newOOI});
-    rois.erase(rois_it); // automatically moves the it forward one
-    newOOIs++;
+  ooi_list_.insert({ newOOI->get_id(), newOOI });
+  rois.erase(rois_it);  // automatically moves the it forward one
+  newOOIs++;
 }
 #pragma GCC diagnostic error "-Wunused-parameter"
 
-void OOI_Processor::processFrame(const int frameId) {
-    boost::shared_ptr<Frame> frame0;
-    try {
-        frame0 = frameSequence.getFrame(frameId);
-    } catch (std::exception& e) {
-        LOG(WARNING) << "OOI_Processor::processFrame - exception getting frame " << frameId << ". ";
-        return;
-    }
+void OOI_Processor::process_frame(const int frameId) {
+  boost::shared_ptr<Frame> frame0;
+  try {
+    frame0 = frame_sequence_.get_frame(frameId);
+  } catch (std::exception& e) {
+    LOG(WARNING)<< "OOI_Processor::processFrame - exception getting frame " << frameId << ". ";
+    return;
+  }
 
 //    // Copy the ROIs so we can delete the ones we have processed
 //    std::vector<cv::Rect> rois = frame0->getRoIs();
@@ -160,21 +161,21 @@ void OOI_Processor::processFrame(const int frameId) {
 //            ", deletedOOIS " << deletedOOIs << ", ROIs " << frame0->getRoIs().size() <<
 //            ", OOIs " << ooiList.size() << std::endl;
 
-    next(frameId);
-    //   std::cout << "OOI_Processor::processFrame(" << frameId << ")" << std::endl;
+  next_(frameId);
+  //   std::cout << "OOI_Processor::processFrame(" << frameId << ")" << std::endl;
 }
-
 
 //void OOI_Processor::classifyThis(boost::shared_ptr<Frame> frame0, OOI* newOOI) {
 //    // Get the image inside the ROI
-//    cv::Mat image = frame0->getOriginalImage()(newOOI->getRectForClassification(frame0->getOriginalImage().cols, frame0->getOriginalImage().rows));////
-
+//    cv::Mat image = frame0->getOriginalImage()(newOOI->getRectForClassification
+//        (frame0->getOriginalImage().cols, frame0->getOriginalImage().rows));////
+//
 //    if(image.empty()){
 //        std::cerr << "OOI image is blank" << std::endl;
 //        return;
 //    }
 
-    // Classify the image
+// Classify the image
 //    std::vector<Prediction> predictions = caffeClassifier.Classify(image,1);
 //    int i = 0;
 ////    while (isblank(predictions.front().first[i])) i++;
@@ -185,11 +186,10 @@ void OOI_Processor::processFrame(const int frameId) {
 //    newOOI->setClassification(foo);
 //    newOOI->setLastIdFrame(frame0->getFrameId());
 
-    /* Print the top N predictions. */
+/* Print the top N predictions. */
 //    for (size_t i = 0; i < predictions.size(); ++i) {
 //        Prediction p = predictions[i];
 //        std::cout << std::fixed << std::setprecision(4) << p.second << " - \""
 //                << p.first << "\"" << std::endl;
 //    }
-
 //}

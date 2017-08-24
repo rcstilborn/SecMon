@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 8, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef GUI_HEADER_H_
@@ -12,19 +15,16 @@
 
 namespace http {
 
-struct Header
-{
-    Header(const std::string& name = "", const std::string& value = "")
-        :
-          name(name),
-          value(value)
-    {
-    }
+struct Header {
+  explicit Header(const std::string& name = "", const std::string& value = "")
+      : name(name),
+        value(value) {
+  }
 
   std::string name;
   std::string value;
 };
 
-} // namespace http
+}  // namespace http
 
-#endif /* GUI_HEADER_H_ */
+#endif // GUI_HEADER_H_

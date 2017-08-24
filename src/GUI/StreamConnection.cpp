@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 10, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #include "StreamConnection.h"
@@ -23,9 +26,10 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
-
+#include <utility>
 #include "Header.h"
 #include "Stream.h"
+
 
 namespace http {
 
@@ -34,14 +38,14 @@ const std::string FrameHeader("\r\n--BOUNDARYSTRING\r\nContent-type: image/jpeg\
 const char crlf[] = { '\r', '\n' };
 
 StreamConnection::StreamConnection(http::connection_ptr conn, Stream& stream)
-: strand_(conn->socket().get_io_service()),
-  socket_(std::move(conn->socket())),
-  stream_(stream),
-  stream_signal_connection_(),
-  buffer_(),
-  request_(conn->getRequest()),
-  reply_(),
-  outbox_(){
+    : strand_(conn->socket().get_io_service()),
+      socket_(std::move(conn->socket())),
+      stream_(stream),
+      stream_signal_connection_(),
+      buffer_(),
+      request_(conn->getRequest()),
+      reply_(),
+      outbox_() {
 //    std::cout << "StreamConnection::StreamConnection - constructed - " << stream.getStreamId() << std::endl;
 }
 
@@ -55,123 +59,108 @@ StreamConnection::~StreamConnection() {
 }
 
 void StreamConnection::start() {
-    sendInitialHeaders();
-    stream_signal_connection_ = stream_.connectToSignal(strand_.wrap(boost::bind(&StreamConnection::sendFrame, shared_from_this(), _1)));
+  sendInitialHeaders();
+  stream_signal_connection_ = stream_.connectToSignal(
+      strand_.wrap(boost::bind(&StreamConnection::sendFrame, shared_from_this(), _1)));
 }
 
 void StreamConnection::sendInitialHeaders() {
+  // Fill out the reply to be sent to the client.
+  //    std::cout << "StreamConnection::sendInitialHeaders - preparing headers" << std::endl;
 
-    // Fill out the reply to be sent to the client.
-    //    std::cout << "StreamConnection::sendInitialHeaders - preparing headers" << std::endl;
-
-    Reply reply;
-    reply.status = Reply::ok;
-    reply.headers.push_back(Header("Connection", "Keep-Alive"));
-    reply.headers.push_back(Header("Max-Age", "0"));
-    reply.headers.push_back(Header("Expires", "0"));
-    reply.headers.push_back(Header("Cache-Control", "no-cache"));
-    reply.headers.push_back(Header("Pragma", "no-cache"));
-    reply.headers.push_back(Header("Content-Type", "multipart/x-mixed-replace; boundary=" BOUNDARYSTRING));
-    message_ptr msg_ptr(new FrameToSend);
-    outbox_.push_back(msg_ptr);
-    boost::asio::async_write(socket_, reply.to_buffers(),
-            strand_.wrap(
-                    boost::bind(&StreamConnection::handle_write, shared_from_this(),
-                            boost::asio::placeholders::error,
-                            boost::asio::placeholders::bytes_transferred)));
-
-//    std::cout << "StreamConnection::sendInitialHeaders - sent headers" << std::endl;
+  Reply reply;
+  reply.status = Reply::ok;
+  reply.headers.push_back(Header("Connection", "Keep-Alive"));
+  reply.headers.push_back(Header("Max-Age", "0"));
+  reply.headers.push_back(Header("Expires", "0"));
+  reply.headers.push_back(Header("Cache-Control", "no-cache"));
+  reply.headers.push_back(Header("Pragma", "no-cache"));
+  reply.headers.push_back(Header("Content-Type", "multipart/x-mixed-replace; boundary=" BOUNDARYSTRING));
+  message_ptr msg_ptr(new FrameToSend);
+  outbox_.push_back(msg_ptr);
+  boost::asio::async_write(
+      socket_,
+      reply.to_buffers(),
+      strand_.wrap(
+          boost::bind(&StreamConnection::handle_write, shared_from_this(), boost::asio::placeholders::error,
+                      boost::asio::placeholders::bytes_transferred)));
 }
 
-void StreamConnection::sendFrame(SceneInterface::image_ptr image){
-//        std::cout << "StreamConnection::sendFrame - sending image" << std::endl;
-
-    message_ptr msg_ptr(new FrameToSend);
-    msg_ptr->buffers_.push_back(boost::asio::buffer(FrameHeader));
-    msg_ptr->buffers_.push_back(boost::asio::buffer(boost::lexical_cast<std::string>(image->size())));
-    msg_ptr->buffers_.push_back(boost::asio::buffer(crlf));
-    msg_ptr->buffers_.push_back(boost::asio::buffer(crlf));
-    msg_ptr->buffers_.push_back(boost::asio::buffer(*image));
+void StreamConnection::sendFrame(SceneInterface::image_ptr image) {
+  message_ptr msg_ptr(new FrameToSend);
+  msg_ptr->buffers_.push_back(boost::asio::buffer(FrameHeader));
+  msg_ptr->buffers_.push_back(boost::asio::buffer(boost::lexical_cast<std::string>(image->size())));
+  msg_ptr->buffers_.push_back(boost::asio::buffer(crlf));
+  msg_ptr->buffers_.push_back(boost::asio::buffer(crlf));
+  msg_ptr->buffers_.push_back(boost::asio::buffer(*image));
 //    msg_ptr->buffers_.push_back(boost::asio::buffer("\r\n--BOUNDARYSTRING\r\n"));
-    msg_ptr->ptr_ = image;
-    strand_.post(boost::bind(&StreamConnection::addToOutbox, shared_from_this(), msg_ptr));
-
-//    std::cout << "StreamConnection::sendFrame - sent frame " << boost::lexical_cast<std::string>(image->size()) << stream_.getStreamId() << std::endl;
-
+  msg_ptr->ptr_ = image;
+  strand_.post(boost::bind(&StreamConnection::addToOutbox, shared_from_this(), msg_ptr));
 }
 
-void StreamConnection::handle_read(const boost::system::error_code& e,
-        std::size_t bytes_transferred)
-{
-    if (e) {
-        LOG(WARNING) << "StreamConnection::handle_read - got " << e.message() << "and bytes transferred " << bytes_transferred;
-    }
-    if (e == boost::asio::error::eof  || e == boost::asio::error::connection_reset) {
-        boost::system::error_code ignored_ec;
-        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
-        stream_.deregisterConnection(shared_from_this());
-    } else {
-        socket_.async_read_some(boost::asio::buffer(buffer_),
-                strand_.wrap(
-                        boost::bind(&StreamConnection::handle_read, shared_from_this(),
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred)));
-
-    }
+void StreamConnection::handle_read(const boost::system::error_code& e, std::size_t bytes_transferred) {
+  if (e) {
+    LOG(WARNING) << "StreamConnection::handle_read - got " << e.message() <<
+                    "and bytes transferred " << bytes_transferred;
+  }
+  if (e == boost::asio::error::eof || e == boost::asio::error::connection_reset) {
+    boost::system::error_code ignored_ec;
+    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+    stream_.deregisterConnection(shared_from_this());
+  } else {
+    socket_.async_read_some(boost::asio::buffer(buffer_),
+        strand_.wrap(
+            boost::bind(&StreamConnection::handle_read, shared_from_this(),
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred)));
+  }
 }
-
 
 void StreamConnection::addToOutbox(const message_ptr& msg_ptr) {
-    outbox_.push_back( msg_ptr );
-    if ( outbox_.size() > 1 ) {
-//        std::cout << "Got a new message but one is already pending" << std::endl;
-        // outstanding async_write
-        return;
-    }
-    this->writeNextMessage();
+  outbox_.push_back(msg_ptr);
+  if (outbox_.size() > 1) {
+    // outstanding async_write
+    return;
+  }
+  this->writeNextMessage();
 }
 
-void StreamConnection::writeNextMessage()
-{
-    //    const message& msg = *outbox_[0];
-    if( !outbox_.empty()) {
-        boost::asio::async_write(socket_, outbox_[0]->buffers_,
-                strand_.wrap(
-                        boost::bind(&StreamConnection::handle_write, shared_from_this(),
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred)));
-//        std::cout << "Sending next message" << std::endl;
-    }
+void StreamConnection::writeNextMessage() {
+  //    const message& msg = *outbox_[0];
+  if (!outbox_.empty()) {
+    boost::asio::async_write(
+        socket_,
+        outbox_[0]->buffers_,
+        strand_.wrap(
+            boost::bind(&StreamConnection::handle_write, shared_from_this(), boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred)));
+  }
 }
 
-void StreamConnection::handle_write(const boost::system::error_code& e,
-        std::size_t bytes_transferred){
-    if( !outbox_.empty())
-        outbox_.pop_front();
-    if (e)
-    {
-        LOG(WARNING) << "StreamConnection::handle_write - got error from write operation " << e.message() << " and bytes transferred " << bytes_transferred;
-        // Initiate graceful connection closure.
-        stream_signal_connection_.disconnect();
-        boost::system::error_code ignored_ec;
-        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
-        stream_.deregisterConnection(shared_from_this());
-        return;
-    }
-//    std::cout << "StreamConnection::handle_write - wrote something! " << bytes_transferred << std::endl;
-    if( !outbox_.empty())
-        writeNextMessage();
+void StreamConnection::handle_write(const boost::system::error_code& e, std::size_t bytes_transferred) {
+  if (!outbox_.empty())
+    outbox_.pop_front();
+  if (e) {
+    LOG(WARNING) << "StreamConnection::handle_write - got error from write operation " <<
+                    e.message() << " and bytes transferred " << bytes_transferred;
+    // Initiate graceful connection closure.
+    stream_signal_connection_.disconnect();
+    boost::system::error_code ignored_ec;
+    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+    stream_.deregisterConnection(shared_from_this());
+    return;
+  }
+  if (!outbox_.empty())
+    writeNextMessage();
 //    else
 //        socket_.async_read_some(boost::asio::buffer(buffer_),
 //                strand_.wrap(
 //                        boost::bind(&StreamConnection::handle_read, shared_from_this(),
 //                                boost::asio::placeholders::error,
 //                                boost::asio::placeholders::bytes_transferred)));
-
 }
 
-} // namespace http
-
+}  // namespace http
 
 // ************ old sendFrame ****************
 //        Reply reply;
@@ -235,5 +224,4 @@ void StreamConnection::handle_write(const boost::system::error_code& e,
 //    //                            boost::asio::placeholders::bytes_transferred)));
 //
 //}
-
 
