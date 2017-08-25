@@ -10,13 +10,13 @@
 
 #include "FrameSequence.h"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/thread/lock_guard.hpp>
 #include <boost/thread/pthread/mutex.hpp>
 #include <map>
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <memory>
 
 #include "Frame.h"
 
@@ -38,12 +38,12 @@ void FrameSequence::setSize(const int width, const int height) {
   height_ = height;
 }
 
-boost::shared_ptr<Frame> FrameSequence::get_new_frame() {
+std::shared_ptr<Frame> FrameSequence::get_new_frame() {
   const int frame_id = current_frame_id_++;
-  boost::shared_ptr<Frame> newFrame(new Frame(frame_id, width_, height_));
+  std::shared_ptr<Frame> newFrame(new Frame(frame_id, width_, height_));
   {
     boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
-    this->frames_.insert(std::pair<const int, boost::shared_ptr<Frame>>(frame_id, newFrame));
+    this->frames_.insert(std::pair<const int, std::shared_ptr<Frame>>(frame_id, newFrame));
   }
   if (frames_.size() > frame_maximum) {
     delete_earliest_frame();
@@ -59,7 +59,7 @@ void FrameSequence::delete_frame(const int frame_id) {
   frames_.erase(it);
 }
 
-boost::shared_ptr<Frame> FrameSequence::get_frame(const int frame_id) {
+std::shared_ptr<Frame> FrameSequence::get_frame(const int frame_id) {
   boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
   auto it = frames_.find(frame_id);
   if (it == frames_.end())
@@ -67,9 +67,9 @@ boost::shared_ptr<Frame> FrameSequence::get_frame(const int frame_id) {
   return it->second;
 }
 
-std::vector<boost::shared_ptr<Frame>> FrameSequence::get_frame_list(const int frame_id, const int listSize) {
+std::vector<std::shared_ptr<Frame>> FrameSequence::get_frame_list(const int frame_id, const int listSize) {
   boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
-  std::vector<boost::shared_ptr<Frame>> frameList;
+  std::vector<std::shared_ptr<Frame>> frameList;
   auto it = frames_.find(frame_id);
   if (it == frames_.end())
     throw std::invalid_argument("No such frame");

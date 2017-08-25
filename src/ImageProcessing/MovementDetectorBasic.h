@@ -10,8 +10,9 @@
 
 #ifndef IMAGEPROCESSING_MOVEMENTDETECTORBASIC_H_
 #define IMAGEPROCESSING_MOVEMENTDETECTORBASIC_H_
+
 #include <opencv2/opencv.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "MovementDetector.h"
 
@@ -20,7 +21,7 @@ class MovementDetectorBasic : public MovementDetector {
   MovementDetectorBasic();
   virtual ~MovementDetectorBasic();
 
-  void process_frame(boost::shared_ptr<Frame> frame0);
+  void process_frame(std::shared_ptr<Frame> frame0);
 
  private:
   void search_for_movement(cv::Mat thresholdImage, cv::Mat &cameraFeed);

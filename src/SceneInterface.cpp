@@ -13,6 +13,7 @@
 #include <boost/thread/lock_guard.hpp>
 
 #include <string>
+#include <memory>
 
 #include "Frame.h"
 #include "FrameSequence.h"
@@ -42,7 +43,7 @@ const std::string& SceneInterface::get_display_name() const {
 
 void SceneInterface::add_stream(const std::string& name) {
   boost::lock_guard<boost::mutex> guard(streams_list_mtx_);
-  boost::shared_ptr<SceneInterface::Stream> stream_ptr(new SceneInterface::Stream(name));
+  std::shared_ptr<SceneInterface::Stream> stream_ptr(new SceneInterface::Stream(name));
   streams_.push_back(stream_ptr);
   // TODO(richard): Should pass the shared_ptr
   gui_.registerNewStream(*stream_ptr);

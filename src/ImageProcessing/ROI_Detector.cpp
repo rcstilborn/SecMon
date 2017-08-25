@@ -10,7 +10,6 @@
 
 #include "ROI_Detector.h"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/matx.hpp>
 #include <opencv2/core/types.hpp>
@@ -19,6 +18,7 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include <memory>
 
 ROI_Detector::ROI_Detector() {
 }
@@ -100,7 +100,7 @@ void ROI_Detector::consolidate_rectangles(std::vector<cv::Rect>& rects) {
   }
 }
 
-void ROI_Detector::processFrame(boost::shared_ptr<Frame> frame0) {
+void ROI_Detector::processFrame(std::shared_ptr<Frame> frame0) {
   cv::Mat& foreground = frame0->get_image("foreground");
   cv::Mat& overlayImage = frame0->get_overlay_image();
 

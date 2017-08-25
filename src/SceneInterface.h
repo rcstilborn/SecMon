@@ -13,18 +13,18 @@
 
 #include <boost/core/noncopyable.hpp>
 #include <boost/signals2/signal.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/thread/pthread/mutex.hpp>
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class FrameSequence;
 class GUI_Interface;
 
 class SceneInterface : private boost::noncopyable {
  public:
-  typedef boost::shared_ptr<std::vector<unsigned char>> image_ptr;
+  typedef std::shared_ptr<std::vector<unsigned char>> image_ptr;
   typedef boost::signals2::signal<void(image_ptr)> image_ready_signal;
   struct Stream {
     explicit Stream(const std::string& name)
@@ -52,7 +52,7 @@ class SceneInterface : private boost::noncopyable {
   GUI_Interface& gui_;
   FrameSequence& frame_sequence_;
   boost::mutex streams_list_mtx_;
-  std::vector<boost::shared_ptr<Stream>> streams_;
+  std::vector<std::shared_ptr<Stream>> streams_;
 };
 
 #endif  // SCENEINTERFACE_H_

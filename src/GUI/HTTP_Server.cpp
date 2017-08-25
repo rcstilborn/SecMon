@@ -18,7 +18,6 @@
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/socket_base.hpp>
 #include <boost/bind/bind.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 

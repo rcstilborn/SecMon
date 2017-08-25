@@ -17,13 +17,13 @@
 #include <iostream>
 #include <utility>
 #include <string>
+#include <memory>
 
 StreamDirectory::StreamDirectory(boost::asio::io_service& io_service)
     : io_service_(io_service),
       stream_id(0),
       stream_list_(),
       stream_list_mtx_() {
-  //    std::cout << "StreamDirectory::StreamDirectory() - constructing" << std::endl;
 }
 
 StreamDirectory::~StreamDirectory() {
@@ -33,17 +33,17 @@ StreamDirectory::~StreamDirectory() {
 
 void StreamDirectory::addStream(SceneInterface::Stream& stream) {
   boost::lock_guard<boost::mutex> guard(stream_list_mtx_);
-  boost::shared_ptr<Stream> stream_ptr(new Stream(stream.image_ready, ++stream_id));
+  std::shared_ptr<Stream> stream_ptr(new Stream(stream.image_ready, ++stream_id));
   DLOG(INFO)<< "StreamDirectory::addStream() - " << stream.name << " mapped to " << stream_id << ".mjpeg";
-  stream_list_.insert(std::pair<const int, boost::shared_ptr<Stream>>(stream_id, stream_ptr));
+  stream_list_.insert(std::pair<const int, std::shared_ptr<Stream>>(stream_id, stream_ptr));
 }
 
 //void StreamDirectory::addStream(const std::string& name,
-//                                boost::signals2::signal<void (boost::shared_ptr<std::vector<unsigned char>>)> signal){
+//                                boost::signals2::signal<void (std::shared_ptr<std::vector<unsigned char>>)> signal){
 //    boost::lock_guard<boost::mutex> guard(stream_list_mtx_);
-//    boost::shared_ptr<Stream> stream_ptr(new Stream(signal, ++stream_id));
+//    std::shared_ptr<Stream> stream_ptr(new Stream(signal, ++stream_id));
 //    std::cout << "StreamDirectory::addStream() - " << name << " mapped to " << stream_id << ".mjpeg" << std::endl;
-//    stream_list_.insert(std::pair<const int,boost::shared_ptr<Stream>>(stream_id,stream_ptr));
+//    stream_list_.insert(std::pair<const int,std::shared_ptr<Stream>>(stream_id,stream_ptr));
 //}
 
 bool StreamDirectory::handleValidStream(const std::string& streamRequest, http::connection_ptr conn) {
@@ -63,10 +63,8 @@ bool StreamDirectory::handleValidStream(const std::string& streamRequest, http::
     return false;
   }
 
-  //    std::cout << "StreamDirectory::handle_stream() - got request for stream id " << stream_id << std::endl;
   auto it = stream_list_.find(stream_id);
   if (it != stream_list_.end()) {
-    //        std::cout << "StreamDirectory::handle_stream() - found the correct stream" << std::endl;
     it->second->registerNewConnection(conn);
     return true;
   } else {

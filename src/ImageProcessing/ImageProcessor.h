@@ -16,7 +16,6 @@
 #include <boost/core/noncopyable.hpp>
 #include <boost/function/function_fwd.hpp>
 #include <boost/function.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <string>
 
 #include "../Frame.h"
@@ -63,7 +62,7 @@ class ImageProcessor {
   ROI_Detector roi_;
 
   void process_frame(const int frameId);
-//    void signalNewDebugImage(const int signal_id, const std::string& image_name, boost::shared_ptr<Frame> frame);
+//    void signalNewDebugImage(const int signal_id, const std::string& image_name, std::shared_ptr<Frame> frame);
 };
 
 #endif // IMAGEPROCESSING_IMAGEPROCESSOR_H_

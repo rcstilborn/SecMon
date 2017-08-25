@@ -10,6 +10,8 @@
 
 #include "MovementDetectorBasic.h"
 #include <vector>
+#include <memory>
+
 #include "../Frame.h"
 
 //our sensitivity value to be used in the absdiff() function
@@ -25,7 +27,7 @@ MovementDetectorBasic::MovementDetectorBasic()
 MovementDetectorBasic::~MovementDetectorBasic() {
 }
 
-void MovementDetectorBasic::process_frame(boost::shared_ptr<Frame> frame0) {
+void MovementDetectorBasic::process_frame(std::shared_ptr<Frame> frame0) {
   //set up the matrices that we will need
   //the two frames we will be comparing
   cv::Mat& img0 = frame0->get_original_image();

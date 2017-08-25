@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 10, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef GUI_STREAMCONNECTION_H_
@@ -15,12 +18,11 @@
 #include <boost/asio/strand.hpp>
 #include <boost/core/noncopyable.hpp>
 #include <boost/signals2/connection.hpp>
-#include <boost/smart_ptr/enable_shared_from_this.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
 #include <cstddef>
 #include <deque>
 #include <vector>
+#include <memory>
 
 #include "../SceneInterface.h"
 #include "Connection.h"
@@ -31,9 +33,8 @@ class Stream;
 
 namespace http {
 
-class StreamConnection : public boost::enable_shared_from_this<StreamConnection>, private boost::noncopyable {
+class StreamConnection : public std::enable_shared_from_this<StreamConnection>, private boost::noncopyable {
  public:
-
   StreamConnection(http::connection_ptr conn, Stream& stream);
   virtual ~StreamConnection();
 
@@ -53,16 +54,12 @@ class StreamConnection : public boost::enable_shared_from_this<StreamConnection>
     FrameToSend()
         : buffers_(),
           ptr_() {
-//              std::cout << "FrameToSend::FrameToSend() - constructed" << std::endl;
     }
-//          ~FrameToSend() {
-//              std::cout << "FrameToSend::~FrameToSend() - destructed" << std::endl;
-//          }
     std::vector<boost::asio::const_buffer> buffers_;
-    boost::shared_ptr<std::vector<unsigned char>> ptr_;
+    std::shared_ptr<std::vector<unsigned char>> ptr_;
   };
 
-  typedef boost::shared_ptr<FrameToSend> message_ptr;
+  typedef std::shared_ptr<FrameToSend> message_ptr;
 
   void addToOutbox(const message_ptr& msg_ptr);
   void writeNextMessage();
@@ -97,11 +94,10 @@ class StreamConnection : public boost::enable_shared_from_this<StreamConnection>
   // Outgoing queue
   typedef std::deque<message_ptr> Outbox;
   Outbox outbox_;
-
 };
 
-typedef boost::shared_ptr<StreamConnection> stream_connection_ptr;
+typedef std::shared_ptr<StreamConnection> stream_connection_ptr;
 
 }  // namespace http
 
-#endif /* GUI_STREAMCONNECTION_H_ */
+#endif // GUI_STREAMCONNECTION_H_

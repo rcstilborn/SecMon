@@ -11,10 +11,10 @@
 #ifndef IMAGEPROCESSING_ROI_DETECTOR_H_
 #define IMAGEPROCESSING_ROI_DETECTOR_H_
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/types.hpp>
 #include <cstdbool>
 #include <vector>
+#include <memory>
 
 #include "../Frame.h"
 
@@ -23,7 +23,7 @@ class ROI_Detector {
   ROI_Detector();
   virtual ~ROI_Detector();
 
-  void processFrame(boost::shared_ptr<Frame> frame0);
+  void processFrame(std::shared_ptr<Frame> frame0);
 
 //private:
   static bool is_too_small_(std::vector<cv::Point> contour);

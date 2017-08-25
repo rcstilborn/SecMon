@@ -11,13 +11,13 @@
 #include "OOI_Processor.h"
 
 #include <boost/bind/bind.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgproc.hpp>
 #include <glog/logging.h>
 #include <exception>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "../Frame.h"
 #include "../FrameSequence.h"
@@ -46,8 +46,8 @@ void OOI_Processor::process_next_frame(const int frameId) {
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 void OOI_Processor::create_new_ooi(std::vector<cv::Rect>::iterator rois_it, const int frameId,
-                                   const boost::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois) {
-  boost::shared_ptr<OOI> newOOI(new OOI(next_ooi_id_++, *rois_it, frameId));
+                                   const std::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois) {
+  std::shared_ptr<OOI> newOOI(new OOI(next_ooi_id_++, *rois_it, frameId));
 //    classifyThis(frame0, newOOI);
   ooi_list_.insert({ newOOI->get_id(), newOOI });
   rois.erase(rois_it);  // automatically moves the it forward one
@@ -56,7 +56,7 @@ void OOI_Processor::create_new_ooi(std::vector<cv::Rect>::iterator rois_it, cons
 #pragma GCC diagnostic error "-Wunused-parameter"
 
 void OOI_Processor::process_frame(const int frameId) {
-  boost::shared_ptr<Frame> frame0;
+  std::shared_ptr<Frame> frame0;
   try {
     frame0 = frame_sequence_.get_frame(frameId);
   } catch (std::exception& e) {
@@ -144,7 +144,7 @@ void OOI_Processor::process_frame(const int frameId) {
 //    //    std::cout << "Got " << ooiList.size() << " OOIs" << std::endl;
 //
 //    cv::Mat& overlayImage = frame0->getOverlayImage();
-//    std::map<unsigned int, boost::shared_ptr<OOI>>::iterator ooi_it;
+//    std::map<unsigned int, std::shared_ptr<OOI>>::iterator ooi_it;
 //    for (ooi_it = ooiList.begin(); ooi_it != ooiList.end();) {
 //        OOI& ooi = *ooi_it->second.get();
 //        //    for(auto ooi : ooiList) {
@@ -165,7 +165,7 @@ void OOI_Processor::process_frame(const int frameId) {
   //   std::cout << "OOI_Processor::processFrame(" << frameId << ")" << std::endl;
 }
 
-//void OOI_Processor::classifyThis(boost::shared_ptr<Frame> frame0, OOI* newOOI) {
+//void OOI_Processor::classifyThis(std::shared_ptr<Frame> frame0, OOI* newOOI) {
 //    // Get the image inside the ROI
 //    cv::Mat image = frame0->getOriginalImage()(newOOI->getRectForClassification
 //        (frame0->getOriginalImage().cols, frame0->getOriginalImage().rows));////

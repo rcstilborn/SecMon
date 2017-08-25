@@ -15,10 +15,10 @@
 #include <glog/logging.h>
 #include <exception>
 #include <iostream>
+#include <memory>
 
 #include "../FrameSequence.h"
 #include "MovementDetectorBasic.h"
-//#include "MovementDetectorViBe.h"
 
 ImageProcessor::ImageProcessor(boost::asio::io_service& io_service, SceneInterface& sceneIf,
                                FrameSequence& frameSequence, boost::function<void(const int)> next)
@@ -50,8 +50,7 @@ void ImageProcessor::process_next_frame(const int frameId) {
 }
 
 void ImageProcessor::process_frame(const int frameId) {
-  //    std::cout << "ImageProcessor::processFrame id=" << frameId << std::endl;
-  boost::shared_ptr<Frame> frame0;
+  std::shared_ptr<Frame> frame0;
   try {
     frame0 = frame_sequence_.get_frame(frameId);
   } catch (std::exception& e) {
@@ -94,7 +93,7 @@ void ImageProcessor::process_frame(const int frameId) {
 }
 
 //void ImageProcessor::signalNewDebugImage(const int signal_id, const std::string& image_name,
-//                                         boost::shared_ptr<Frame> frame) {
+//                                         std::shared_ptr<Frame> frame) {
 //    try {
 //        switch (signal_id) {
 //        case 0:

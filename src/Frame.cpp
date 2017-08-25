@@ -10,7 +10,6 @@
 
 #include "Frame.h"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/cvdef.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/mat.inl.hpp>

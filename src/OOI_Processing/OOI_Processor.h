@@ -18,6 +18,7 @@
 #include <boost/function.hpp>
 #include <vector>
 #include <map>
+#include <memory>
 
 #include "OOI.h"
 
@@ -31,7 +32,7 @@ class OOI_Processor : private boost::noncopyable {
                 boost::function<void(const int)> next);
   virtual ~OOI_Processor();
   void process_next_frame(const int frameId);
-  void classify_this(boost::shared_ptr<Frame> frame0, OOI* newOOI);
+  void classify_this(std::shared_ptr<Frame> frame0, OOI* newOOI);
 
  private:
   /// Strand to ensure the connection's handlers are not called concurrently.
@@ -42,10 +43,10 @@ class OOI_Processor : private boost::noncopyable {
   FrameSequence& frame_sequence_;
   boost::function<void(const int)> next_;
   unsigned int next_ooi_id_ = 0;
-  std::map<unsigned int, boost::shared_ptr<OOI>> ooi_list_;
+  std::map<unsigned int, std::shared_ptr<OOI>> ooi_list_;
   void process_frame(const int frameId);
   void create_new_ooi(std::vector<cv::Rect>::iterator rois_it, const int frameId,
-                      const boost::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois);
+                      const std::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois);
 };
 
 #endif // OOI_PROCESSING_OOI_PROCESSOR_H_

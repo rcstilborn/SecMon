@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <memory>
 
 Stream::Stream(SceneInterface::image_ready_signal& signal, int stream_id)
     : signal_(signal),
@@ -43,7 +44,7 @@ void Stream::registerNewConnection(http::connection_ptr conn) {
   //    if (stream_id_ == 3) {
   //
   //        cv::Mat image(cv::imread("/home/richard/Dev/OpenCV/opencv-2.4.8/samples/c/lena.jpg"));
-  //        boost::shared_ptr<std::vector<unsigned char>> lastFrame(new std::vector<unsigned char>);
+  //        std::shared_ptr<std::vector<unsigned char>> lastFrame(new std::vector<unsigned char>);
   //        if(!cv::imencode(".jpg",image,*lastFrame))
   //            std::cerr << "Stream::Stream() - Problem converting to jpeg" << std::endl;
   //        str_conn->sendFrame(lastFrame);
@@ -52,25 +53,25 @@ void Stream::registerNewConnection(http::connection_ptr conn) {
   //        //    std::ifstream is("/home/richard/Dev/OpenCV/opencv-2.4.8/samples/c/lena.jpg",
   //                               std::ios::in | std::ios::binary);
   //        //    std::istream_iterator<unsigned char> start(is), end;
-  //        //    boost::shared_ptr<std::vector<unsigned char>> frame(new std::vector<unsigned char>(start, end));
-  //        ////    boost::shared_ptr<Image> frame(new Image(start, end));
+  //        //    std::shared_ptr<std::vector<unsigned char>> frame(new std::vector<unsigned char>(start, end));
+  //        ////    std::shared_ptr<Image> frame(new Image(start, end));
   //        //    std::cout << "Sending image of size... " << frame->size() << std::endl;
   //        //    str_conn->sendFrame(frame);
   //
-  //        //    boost::shared_ptr<std::vector<unsigned char>> frame2(frame);
+  //        //    std::shared_ptr<std::vector<unsigned char>> frame2(frame);
   //        //    str_conn->sendFrame(frame2);
   //    } else if (stream_id_ == 4 ) {
   //        // Create a test image, convert to jpg and send to browser
   //        cv::Mat image2(cv::Size(640, 480), CV_8UC3,
   //                       cv::Scalar(std::rand() % 255, std::rand() % 255, std::rand() % 255));
-  //        boost::shared_ptr<std::vector<unsigned char>> lastFrame2(new std::vector<unsigned char>);
+  //        std::shared_ptr<std::vector<unsigned char>> lastFrame2(new std::vector<unsigned char>);
   //        if(!cv::imencode(".jpg",image2,*lastFrame2))
   //            std::cerr << "Stream::Stream() - Problem converting to jpeg" << std::endl;
   //        str_conn->sendFrame(lastFrame2);
   //
   //        cv::Mat image3(cv::Size(640, 480), CV_8UC3,
   //                       cv::Scalar(std::rand() % 255, std::rand() % 255, std::rand() % 255));
-  //        boost::shared_ptr<std::vector<unsigned char>> lastFrame3(new std::vector<unsigned char>);
+  //        std::shared_ptr<std::vector<unsigned char>> lastFrame3(new std::vector<unsigned char>);
   //        if(!cv::imencode(".jpg",image3,*lastFrame3))
   //            std::cerr << "Stream::Stream() - Problem converting to jpeg" << std::endl;
   //        str_conn->sendFrame(lastFrame3);

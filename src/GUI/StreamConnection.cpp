@@ -46,7 +46,6 @@ StreamConnection::StreamConnection(http::connection_ptr conn, Stream& stream)
       request_(conn->getRequest()),
       reply_(),
       outbox_() {
-//    std::cout << "StreamConnection::StreamConnection - constructed - " << stream.getStreamId() << std::endl;
 }
 
 StreamConnection::~StreamConnection() {
@@ -66,8 +65,6 @@ void StreamConnection::start() {
 
 void StreamConnection::sendInitialHeaders() {
   // Fill out the reply to be sent to the client.
-  //    std::cout << "StreamConnection::sendInitialHeaders - preparing headers" << std::endl;
-
   Reply reply;
   reply.status = Reply::ok;
   reply.headers.push_back(Header("Connection", "Keep-Alive"));

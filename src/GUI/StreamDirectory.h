@@ -12,11 +12,11 @@
 #define GUI_STREAMDIRECTORY_H_
 
 #include <boost/core/noncopyable.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/thread/pthread/mutex.hpp>
 #include <cstdbool>
 #include <map>
 #include <string>
+#include <memory>
 
 #include "../SceneInterface.h"
 #include "Connection.h"
@@ -31,13 +31,13 @@ class StreamDirectory : private boost::noncopyable {
   bool handleValidStream(const std::string& streamRequest, http::connection_ptr conn);
   void addStream(SceneInterface::Stream& stream);
 //    void addStream(const std::string& name,
-//                   boost::signals2::signal<void (boost::shared_ptr<std::vector<unsigned char>>)> signal);
+//                   boost::signals2::signal<void (std::shared_ptr<std::vector<unsigned char>>)> signal);
 
  private:
   /// The io_service used to perform asynchronous operations.
   boost::asio::io_service& io_service_;
   int stream_id;
-  std::map<const int, boost::shared_ptr<Stream>> stream_list_;
+  std::map<const int, std::shared_ptr<Stream>> stream_list_;
   boost::mutex stream_list_mtx_;
 };
 

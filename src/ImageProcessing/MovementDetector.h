@@ -12,15 +12,14 @@
 #ifndef IMAGEPROCESSING_MOVEMENTDETECTOR_H_
 #define IMAGEPROCESSING_MOVEMENTDETECTOR_H_
 
-#include <boost/smart_ptr/shared_ptr.hpp>
-
+#include <memory>
 #include "../Frame.h"
 
 class Frame;
 
 class MovementDetector {
  public:
-  virtual void process_frame(boost::shared_ptr<Frame> frame0) = 0;
+  virtual void process_frame(std::shared_ptr<Frame> frame0) = 0;
   virtual ~MovementDetector();
 };
 

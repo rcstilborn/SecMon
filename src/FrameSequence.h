@@ -18,10 +18,10 @@
 #ifndef FRAMESEQUENCE_H_
 #define FRAMESEQUENCE_H_
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/thread/pthread/mutex.hpp>
 #include <map>
 #include <vector>
+#include <memory>
 
 const int frame_warning_level = 15;
 const int frame_maximum = 60;
@@ -33,18 +33,18 @@ class FrameSequence {
   FrameSequence();
   virtual ~FrameSequence();
   void setSize(const int width, const int height);
-  boost::shared_ptr<Frame> get_new_frame();
-  boost::shared_ptr<Frame> get_frame(const int frame_id);
+  std::shared_ptr<Frame> get_new_frame();
+  std::shared_ptr<Frame> get_frame(const int frame_id);
   void delete_frame(const int frame_id);
   void delete_earliest_frame();
   void process_next_frame(const int frameId);
 
-  std::vector<boost::shared_ptr<Frame>> get_frame_list(const int frame_id, const int listSize);
+  std::vector<std::shared_ptr<Frame>> get_frame_list(const int frame_id, const int listSize);
 
  private:
   int current_frame_id_;
 
-  std::map<int, boost::shared_ptr<Frame>> frames_;
+  std::map<int, std::shared_ptr<Frame>> frames_;
   boost::mutex frame_list_mtx_;
 
   unsigned int width_ = 0;

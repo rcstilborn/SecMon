@@ -14,13 +14,13 @@
 #include <boost/bind/arg.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/bind/placeholders.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/mat.inl.hpp>
 #include <glog/logging.h>
 #include <exception>
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <memory>
 
 #include "../Frame.h"
 #include "../FrameSequence.h"
@@ -71,7 +71,7 @@ void ImageSource::get_next_frame(const boost::system::error_code& ec) {
     restart_timer();
     return;
   }
-  boost::shared_ptr<Frame> frame = frame_sequence_.get_new_frame();
+  std::shared_ptr<Frame> frame = frame_sequence_.get_new_frame();
   try {
     if (!this->camera_.get_next_frame(frame->get_original_image(), frame->get_original_image())) {
       LOG(WARNING)<< "ImageSource::getNextFrame() \"" << name_ <<

@@ -16,10 +16,9 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/core/noncopyable.hpp>
-#include <boost/smart_ptr/enable_shared_from_this.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
 #include <cstddef>
+#include <memory>
 
 #include "Reply.h"
 #include "Request.h"
@@ -30,7 +29,7 @@ namespace http {
 class RequestHandler;
 
 /// Represents a single connection from a client.
-class Connection : public boost::enable_shared_from_this<Connection>, private boost::noncopyable {
+class Connection : public std::enable_shared_from_this<Connection>, private boost::noncopyable {
  public:
   /// Construct a connection with the given io_service.
   explicit Connection(boost::asio::io_service& io_service, RequestHandler& handler);
@@ -78,7 +77,7 @@ class Connection : public boost::enable_shared_from_this<Connection>, private bo
   Reply reply_;
 };
 
-typedef boost::shared_ptr<Connection> connection_ptr;
+typedef std::shared_ptr<Connection> connection_ptr;
 
 }  // namespace http
 
