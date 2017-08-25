@@ -11,7 +11,6 @@
 #ifndef FRAME_H_
 #define FRAME_H_
 
-#include <boost/date_time/posix_time/ptime.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #ifndef CPU_ONLY
@@ -20,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "SceneInterface.h"
 
@@ -58,7 +58,7 @@ class Frame {
 #endif  // CPU_ONLY
 
   std::string image_names_[kMaxImagesPerFrame];
-  boost::posix_time::ptime start_time_;
+  std::chrono::system_clock::time_point start_time_;
   std::vector<cv::Rect> regions_of_interest_;
 };
 

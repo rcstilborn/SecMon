@@ -11,7 +11,7 @@
 #ifndef IMAGESOURCE_IMAGESOURCE_H_
 #define IMAGESOURCE_IMAGESOURCE_H_
 
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/core/noncopyable.hpp>
 #include <boost/function/function_fwd.hpp>
@@ -55,7 +55,7 @@ class ImageSource : private boost::noncopyable {
 
   boost::function<void(const int)> next_;
 
-  boost::asio::deadline_timer timer_;
+  boost::asio::steady_timer timer_;
   boost::asio::strand strand_;
 
   bool shutting_down_;

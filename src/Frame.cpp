@@ -10,9 +10,6 @@
 
 #include "Frame.h"
 
-#include <boost/date_time/microsec_time_clock.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/cvdef.h>
 #include <opencv2/core/mat.hpp>
@@ -23,6 +20,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <chrono>
 
 Frame::Frame(const int frame_id, const int width, const int height)
     : frame_id_(frame_id),
@@ -129,7 +127,7 @@ SceneInterface::image_ptr Frame::get_original_with_overlay_image_as_jpg() {
 }
 
 void Frame::set_start_time() {
-  this->start_time_ = boost::posix_time::microsec_clock::local_time();
+  this->start_time_ = std::chrono::high_resolution_clock::now();
 }
 
 int Frame::get_frame_id() const {

@@ -12,7 +12,7 @@
 #define PERFORMANCEMETRICS_H_
 
 #include <stddef.h>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/system/error_code.hpp>
 #include <ctime>
 
@@ -23,7 +23,7 @@ class PerformanceMetrics {
 
  private:
   int interval_;
-  boost::asio::deadline_timer timer_;
+  boost::asio::steady_timer timer_;
   int number_of_processors_;
   clock_t last_cpu_usage_, last_system_cpu_usage_, last_user_cpu_usage_;
 

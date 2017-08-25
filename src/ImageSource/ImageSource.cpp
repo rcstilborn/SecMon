@@ -10,24 +10,17 @@
 
 #include "ImageSource.h"
 
-#include <boost/asio/basic_deadline_timer.hpp>
 #include <boost/asio/detail/wrapped_handler.hpp>
 #include <boost/bind/arg.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/bind/placeholders.hpp>
-#include <boost/date_time/microsec_time_clock.hpp>
-#include <boost/date_time/posix_time/posix_time_duration.hpp>
-#include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/date_time/time.hpp>
-#include <boost/date_time/time_duration.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/mat.inl.hpp>
 #include <glog/logging.h>
 #include <exception>
 #include <iostream>
 #include <string>
+#include <chrono>
 
 #include "../Frame.h"
 #include "../FrameSequence.h"
@@ -41,7 +34,7 @@ ImageSource::ImageSource(const std::string& name, const std::string& url, boost:
       scene_interface_(sceneIf),
       frame_sequence_(frameSequence),
       next_(next),
-      timer_(io_service, boost::posix_time::milliseconds(interval_)),
+      timer_(io_service, std::chrono::milliseconds(interval_)),
       strand_(io_service),
       shutting_down_(false) {
   DLOG(INFO)<< "ImageSource(" << name << ") - constructed";
@@ -55,7 +48,7 @@ void ImageSource::start_timer() {
   if (shutting_down_)
     return;
   // Reset the timer from now (restarting the camera takes time)
-  this->timer_.expires_from_now(boost::posix_time::milliseconds(this->interval_));
+  this->timer_.expires_from_now(std::chrono::milliseconds(this->interval_));
   this->timer_.async_wait(strand_.wrap(boost::bind(&ImageSource::get_next_frame, this, _1)));
 }
 
@@ -63,7 +56,7 @@ void ImageSource::restart_timer() {
   if (shutting_down_)
     return;
   // Reset the timer
-  this->timer_.expires_at(this->timer_.expires_at() + boost::posix_time::milliseconds(this->interval_));
+  this->timer_.expires_at(this->timer_.expires_at() + std::chrono::milliseconds(this->interval_));
   this->timer_.async_wait(strand_.wrap(boost::bind(&ImageSource::get_next_frame, this, _1)));
 }
 
@@ -81,8 +74,8 @@ void ImageSource::get_next_frame(const boost::system::error_code& ec) {
   boost::shared_ptr<Frame> frame = frame_sequence_.get_new_frame();
   try {
     if (!this->camera_.get_next_frame(frame->get_original_image(), frame->get_original_image())) {
-      LOG(WARNING)<< "ImageSource::getNextFrame() \"" << name_ << ""
-          "\" - camera returned false so restarting at " << boost::posix_time::microsec_clock::local_time();
+      LOG(WARNING)<< "ImageSource::getNextFrame() \"" << name_ <<
+          "\" - camera returned false so restarting";
       this->camera_.restart();
 
       // Try the camera again
@@ -113,13 +106,10 @@ void ImageSource::get_next_frame(const boost::system::error_code& ec) {
   }
 
   next_(frame->get_frame_id());
-  //    std::cout << "Scene::getNextFrame() - exit" << std::endl;
 }
 
 ImageSource::~ImageSource() {
-  //    std::cout << "~ImageSource() - enter" << std::endl;
-  /*int count = */timer_.cancel();
-  //    std::cout << "~ImageSource() - destructed " << count << std::endl;
+  timer_.cancel();
 }
 
 Camera& ImageSource::get_camera() {
@@ -131,7 +121,6 @@ const std::string& ImageSource::get_name() const {
 }
 
 void ImageSource::shutdown() {
-  //    std::cout << "Scene::shutdown() " << name << std::endl;
   shutting_down_ = true;
   timer_.cancel();
 }

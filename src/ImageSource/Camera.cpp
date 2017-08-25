@@ -10,14 +10,7 @@
 
 #include "Camera.h"
 
-#include <boost/date_time/microsec_time_clock.hpp>
-#include <boost/date_time/posix_time/posix_time_config.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
-#include <boost/date_time/time.hpp>
-#include <boost/date_time/time_clock.hpp>
-#include <boost/date_time/time_duration.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/mat.inl.hpp>
 #include <opencv2/core/types.hpp>
@@ -28,8 +21,11 @@
 #include <glog/logging.h>
 
 #include <iostream>
+#include <iomanip>
 #include <stdexcept>
 #include <string>
+#include <chrono>
+#include <ctime>
 
 Camera::Camera(const std::string& source)
     : source_(source),
@@ -43,10 +39,12 @@ Camera::Camera(const std::string& source)
   else
   real_camera_ = false;
 
-  boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
+  auto start_time = std::chrono::high_resolution_clock::now();
 
   this->camera_.open(source_);
-  boost::posix_time::time_duration dur = boost::posix_time::microsec_clock::local_time() - start;
+  auto end_time = std::chrono::high_resolution_clock::now();
+  int dur = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
   if (!this->camera_.isOpened()) {
     LOG(ERROR) << "Could not open camera at: " << source_;
     throw std::runtime_error("Could not open camera at: " + source_);
@@ -67,19 +65,22 @@ Camera::Camera(const std::string& source)
   left_margin_ = text_size_ * 25;
   top_margin_ = text_size_ * 35;
 
-  DLOG(INFO) << "Connected to camera in " << dur.total_milliseconds()/1000.0 <<
-  "s. With size: [" << this->height_ << "x" << this->width_ << "]  FPS: " << this->fps_;
+  DLOG(INFO) << "Connected to camera in " << dur <<
+                "ms. With size: [" << this->height_ << "x" << this->width_ << "]  FPS: " << this->fps_;
 }
 
 Camera::~Camera() {
-  //    std::cout << "~Camera() - destructed" << std::endl;
 }
 
 bool Camera::get_next_frame(cv::Mat& img, cv::Mat& overlay) {
-  //    std::cout << "Camera::getNextFrame() - enter" << std::endl;
   if (camera_.read(img)) {
     if (real_camera_) {
+      //Couldn't get this to work!
+      //std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+      //std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+      //const std::string now = std::put_time(std::localtime(&now_c), "%c");
       const std::string now = boost::posix_time::to_simple_string(boost::posix_time::second_clock::local_time());
+
       cv::putText(overlay, now, cvPoint(40, 25), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(255, 255, 255), 2);
     } else {
       std::string frame_number = std::to_string((unsigned int) this->camera_.get(CV_CAP_PROP_POS_FRAMES));
@@ -89,7 +90,6 @@ bool Camera::get_next_frame(cv::Mat& img, cv::Mat& overlay) {
     return true;
   }
   return false;
-  //    std::cout << "Camera::getNextFrame() - exit" << std::endl;
 }
 
 int Camera::get_frames_per_second() const {
@@ -109,15 +109,16 @@ unsigned int Camera::get_height() const {
 }
 
 void Camera::restart() {
-  //    std::cout << "Camera::restart() - enter" << std::endl;
   this->camera_.release();
-  boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
-  this->camera_.open(this->source_);
-  boost::posix_time::time_duration dur = boost::posix_time::microsec_clock::local_time() - start;
+  auto start_time = std::chrono::high_resolution_clock::now();
+  this->camera_.open(source_);
+  auto end_time = std::chrono::high_resolution_clock::now();
+  int dur = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
   if (!this->camera_.isOpened()) {
-    LOG(ERROR)<< "Could not re-open camera at: " << source_;
+    LOG(ERROR) << "Could not re-open camera at: " << source_;
     throw std::runtime_error("Could not re-open camera at: " + source_);
   }
   if (real_camera_)
-    DLOG(INFO)<< "Re-connected to camera at " << source_ << " in " << dur.total_milliseconds()/1000.0 << "s";
+    DLOG(INFO) << "Re-connected to camera at " << source_ << " in " << dur << "s";
 }

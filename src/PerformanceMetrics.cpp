@@ -11,14 +11,10 @@
 #include "PerformanceMetrics.h"
 
 #include <glog/logging.h>
-#include <boost/asio/basic_deadline_timer.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/bind/arg.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/bind/placeholders.hpp>
-#include <boost/date_time/posix_time/posix_time_duration.hpp>
-#include <boost/date_time/time.hpp>
-#include <boost/date_time/time_duration.hpp>
 
 #include <string.h>
 #include <sys/resource.h>
@@ -28,8 +24,7 @@
 #include <stdio.h>
 #include <iomanip>
 #include <iostream>
-
-//using namespace boost::placeholders;
+#include <chrono>
 
 //#ifndef CPU_ONLY
 //#include
@@ -37,13 +32,13 @@
 
 PerformanceMetrics::PerformanceMetrics(boost::asio::io_service& io_service, const int interval)
     : interval_(interval),
-      timer_(io_service, boost::posix_time::milliseconds(interval)),
+      timer_(io_service, std::chrono::milliseconds(interval)),
       number_of_processors_(0),
       last_cpu_usage_(),
       last_system_cpu_usage_(),
       last_user_cpu_usage_() {
 
-  this->timer_.expires_from_now(boost::posix_time::seconds(this->interval_));
+  this->timer_.expires_from_now(std::chrono::seconds(this->interval_));
   this->timer_.async_wait(boost::bind(&PerformanceMetrics::get_next_stats, this, boost::placeholders::_1));
 
   FILE* file;
@@ -70,9 +65,10 @@ PerformanceMetrics::PerformanceMetrics(boost::asio::io_service& io_service, cons
   fclose(file);
   std::cout << "Performance Metrics - constructed.  Interval=" << this->interval_ << "s, # processors="
             << this->number_of_processors_ << "Total memory available=" << totalPhysMem << std::endl;
-  DLOG(INFO)<< "Performance Metrics - constructed.  Interval=" << this->interval_
-  << "s, # processors=" << this->number_of_processors_
-  << "Total memory available=" << totalPhysMem;
+  std::cout << std::chrono::high_resolution_clock::period::den << " ticks per second" << std::endl;
+  DLOG(INFO) << "Performance Metrics - constructed.  Interval=" << this->interval_
+             << "s, # processors=" << this->number_of_processors_
+             << "Total memory available=" << totalPhysMem;
   std::cout.precision(4);
 }
 
@@ -91,7 +87,7 @@ void PerformanceMetrics::get_next_stats(const boost::system::error_code& ec) {
             << std::setw(4) << this->get_current_cpu_usage() << "%     " << get_next_indicator() << "     "
             << std::flush;
   // Reset the timer
-  this->timer_.expires_at(this->timer_.expires_at() + boost::posix_time::seconds(this->interval_));
+  this->timer_.expires_at(this->timer_.expires_at() + std::chrono::seconds(this->interval_));
   this->timer_.async_wait(boost::bind(&PerformanceMetrics::get_next_stats, this, boost::placeholders::_1));
 }
 
