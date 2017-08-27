@@ -56,7 +56,7 @@ WebSocketServer::~WebSocketServer() {
   DLOG(INFO)<< "WebSocketServer closing connections";
 //    server.stop_listening();
   for (auto hdl : master_list) {
-    server.close(hdl,websocketpp::close::status::normal, "shutdown");
+    server.close(hdl, websocketpp::close::status::normal, "shutdown");
   }
 }
 
@@ -69,7 +69,7 @@ void WebSocketServer::shutdown() {
   DLOG(INFO)<< "WebSocketServer::shutdown closing connections";
   shuttingDown = true;
   for (auto hdl : master_list) {
-    server.close(hdl,websocketpp::close::status::normal, "shutdown");
+    server.close(hdl, websocketpp::close::status::normal, "shutdown");
   }
   boost::lock_guard<boost::mutex> guard(master_list_mtx);
   master_list.clear();
@@ -79,6 +79,7 @@ void WebSocketServer::shutdown() {
 void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                                  websocketpp::server<websocketpp::config::asio>::message_ptr msg) {
   DLOG(INFO)<< "Got message: " << msg->get_payload();
+  std::cout << "WebSockerServer::on_message" << msg->get_payload() << std::endl;
   rapidjson::Document doc;
   doc.Parse(msg->get_payload().data());
 
@@ -88,20 +89,18 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
   rapidjson::Value& d = doc["data"];
   std::string data = std::string(d.GetString());
-  DLOG(INFO) << "data: " << data;
+  DLOG(INFO) << "data: " << data << hdl.expired();
 
-  if (data == "join")
-  joinRoom(hdl, roomName);
-  else if (data == "leave")
-  leaveRoom(hdl, roomName);
-
+//  if (data == "join")
+//  joinRoom(hdl, roomName);
+//  else if (data == "leave")
+//  leaveRoom(hdl, roomName);
 }
 
 void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   DLOG(INFO)<< "New connection";
   if (shuttingDown) {
     DLOG(INFO) << "Rejecting new connection";
-
   }
   boost::lock_guard<boost::mutex> guard(master_list_mtx);
   master_list.insert(hdl);
@@ -113,81 +112,85 @@ void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   master_list.erase(hdl);
 }
 
-void WebSocketServer::createRoom(const std::string& roomName,
-                                 boost::function<const std::string()> welcomeMessageProvider) {
-  // Check if we already have this room
-  room_list::iterator it = rooms.find(roomName);
-  if (it != this->rooms.end())
-    throw std::invalid_argument("A room with this name already exists: " + roomName);
-
-  // Create the room
-  boost::lock_guard<boost::mutex> guard(rooms_mtx);
-  room new_room;
-  new_room.welcomeMessageProvider = welcomeMessageProvider;
-  this->rooms[roomName] = new_room;
-
-}
+//void WebSocketServer::createRoom(const std::string& roomName,
+//                                 boost::function<const std::string()> welcomeMessageProvider) {
+//  // Check if we already have this room
+//  room_list::iterator it = rooms.find(roomName);
+//  if (it != this->rooms.end())
+//    throw std::invalid_argument("A room with this name already exists: " + roomName);
+//
+//  // Create the room
+//  boost::lock_guard<boost::mutex> guard(rooms_mtx);
+//  room new_room;
+//  new_room.welcomeMessageProvider = welcomeMessageProvider;
+//  this->rooms[roomName] = new_room;
+//}
 
 //void WebSocketServer::deleteRoom(const std::string& roomName){
 //    //    boost::lock_guard<boost::mutex> guard(mtx);
 //
 //}
 
-int WebSocketServer::howManyInRoom(const std::string& roomName) const {
-  room_list::const_iterator it = rooms.find(roomName);
-  if (it == this->rooms.end())
-    throw std::invalid_argument("No room with this name exists: " + roomName);
-  return it->second.occupants.size();
-}
+//int WebSocketServer::howManyInRoom(const std::string& roomName) const {
+//  room_list::const_iterator it = rooms.find(roomName);
+//  if (it == this->rooms.end())
+//    throw std::invalid_argument("No room with this name exists: " + roomName);
+//  return it->second.occupants.size();
+//}
 
-void WebSocketServer::sendToRoom(const std::string& roomName, const std::string& data) {
-  room_list::iterator it = findRoom(roomName);
-  for (auto hdl : it->second.occupants) {
-    server.send(hdl, "{room: " + roomName + ", data: " + data + "}", websocketpp::frame::opcode::TEXT);
-  }
-}
+//void WebSocketServer::sendToRoom(const std::string& roomName, const std::string& data) {
+//  std::cout << "WebSockerServer::sendToRoom" << data << std::endl;
+//  room_list::iterator it = findRoom(roomName);
+//  for (auto hdl : it->second.occupants) {
+//    server.send(hdl, "{room: " + roomName + ", data: " + data + "}", websocketpp::frame::opcode::TEXT);
+//  }
+//}
 
-void WebSocketServer::sendToRoom(const std::string& roomName, void const * data, const int size) {
-  room_list::iterator it = findRoom(roomName);
-  for (auto hdl : it->second.occupants) {
-    DLOG(INFO)<< "Sending to room " << roomName << " binary data of size " << size;
-    server.send(hdl, data, size, websocketpp::frame::opcode::BINARY);
-  }
-}
+//void WebSocketServer::sendToRoom(const std::string& roomName, void const * data, const int size) {
+//  std::cout << "WebSockerServer::sendToRoom data*" << std::endl;
+//  room_list::iterator it = findRoom(roomName);
+//  for (auto hdl : it->second.occupants) {
+//    DLOG(INFO)<< "Sending to room " << roomName << " binary data of size " << size;
+//    server.send(hdl, data, size, websocketpp::frame::opcode::BINARY);
+//  }
+//}
 
-void WebSocketServer::sendToOne(websocketpp::connection_hdl hdl, const std::string& roomName, const std::string& data) {
-  //room_list::iterator it = findRoom(roomName);
+//void WebSocketServer::sendToOne(websocketpp::connection_hdl hdl, const std::string& roomName, const std::string& data) {
+//  std::cout << "WebSockerServer::sendToOne" << data << std::endl;
+//  //room_list::iterator it = findRoom(roomName);
+//
+//  con_msg_man_type::ptr manager = websocketpp::lib::make_shared<con_msg_man_type>();
+//  size_t foo = 1024;
+//  message_type::ptr msg = manager->get_message(websocketpp::frame::opcode::TEXT, foo);
+//
+//  msg.get()->set_payload("{room: ");
+//  msg.get()->append_payload(roomName);
+//  msg.get()->append_payload("}, {data:");
+//  msg.get()->append_payload(data);
+//  msg.get()->append_payload("}");
+//  server.send(hdl, msg);
+//  //    websocketpp::server<websocketpp::config::asio>::message_ptr msg = server.
+//}
 
-  con_msg_man_type::ptr manager = websocketpp::lib::make_shared<con_msg_man_type>();
-  size_t foo = 1024;
-  message_type::ptr msg = manager->get_message(websocketpp::frame::opcode::TEXT, foo);
+//void WebSocketServer::joinRoom(websocketpp::connection_hdl hdl, const std::string& roomName) {
+//  std::cout << "WebSockerServer::joinRoom" << roomName << std::endl;
+//  room_list::iterator it = findRoom(roomName);
+//  boost::lock_guard<boost::mutex> guard(rooms_mtx);
+//  it->second.occupants.insert(hdl);
+//  sendToOne(hdl, roomName, it->second.welcomeMessageProvider());
+//}
 
-  msg.get()->set_payload("{room: ");
-  msg.get()->append_payload(roomName);
-  msg.get()->append_payload("}, {data:");
-  msg.get()->append_payload(data);
-  msg.get()->append_payload("}");
-  server.send(hdl, msg);
-  //    websocketpp::server<websocketpp::config::asio>::message_ptr msg = server.
-}
+//void WebSocketServer::leaveRoom(websocketpp::connection_hdl hdl, const std::string& roomName) {
+//  std::cout << "WebSockerServer::leaveRoom" << roomName << std::endl;
+//  room_list::iterator it = findRoom(roomName);
+//  boost::lock_guard<boost::mutex> guard(rooms_mtx);
+//  it->second.occupants.erase(hdl);
+//}
 
-void WebSocketServer::joinRoom(websocketpp::connection_hdl hdl, const std::string& roomName) {
-  room_list::iterator it = findRoom(roomName);
-  boost::lock_guard<boost::mutex> guard(rooms_mtx);
-  it->second.occupants.insert(hdl);
-  sendToOne(hdl, roomName, it->second.welcomeMessageProvider());
-}
-
-void WebSocketServer::leaveRoom(websocketpp::connection_hdl hdl, const std::string& roomName) {
-  room_list::iterator it = findRoom(roomName);
-  boost::lock_guard<boost::mutex> guard(rooms_mtx);
-  it->second.occupants.erase(hdl);
-}
-
-WebSocketServer::room_list::iterator WebSocketServer::findRoom(const std::string& roomName) {
-  room_list::iterator it = rooms.find(roomName);
-  if (it == this->rooms.end())
-    throw std::invalid_argument("No room with this name exists: " + roomName);
-  return it;
-}
+//WebSocketServer::room_list::iterator WebSocketServer::findRoom(const std::string& roomName) {
+//  room_list::iterator it = rooms.find(roomName);
+//  if (it == this->rooms.end())
+//    throw std::invalid_argument("No room with this name exists: " + roomName);
+//  return it;
+//}
 

@@ -32,7 +32,7 @@ SceneMonitor::SceneMonitor(boost::asio::io_service& io_service, GUI_Interface& g
       gui_(gui),
       scenes_(),
       scenes_mtx_() {
-  gui_.createRoom("cameras", boost::bind<const std::string>(&SceneMonitor::get_scene_names, this));
+//  gui_.createRoom("cameras", boost::bind<const std::string>(&SceneMonitor::get_scene_names, this));
 }
 
 SceneMonitor::~SceneMonitor() {

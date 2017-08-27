@@ -28,9 +28,9 @@ void GUI_Interface::start() {
   httpServer_.start();
   webSocketServer_.start();
 }
-void GUI_Interface::sendCameraList(const std::string& list) {
-  webSocketServer_.sendToRoom("cameras", list);
-}
+//void GUI_Interface::sendCameraList(const std::string& list) {
+//  webSocketServer_.sendToRoom("cameras", list);
+//}
 
 void GUI_Interface::shutdown() {
   webSocketServer_.shutdown();
@@ -42,14 +42,14 @@ void GUI_Interface::registerNewStream(SceneInterface::Stream& stream) {
 }
 
 // TODO(richard): Refactor away later
-void GUI_Interface::createRoom(const std::string& roomName,
-                               boost::function<const std::string()> welcomeMessageProvider) {
-  webSocketServer_.createRoom(roomName, welcomeMessageProvider);
-}
+//void GUI_Interface::createRoom(const std::string& roomName,
+//                               boost::function<const std::string()> welcomeMessageProvider) {
+//  webSocketServer_.createRoom(roomName, welcomeMessageProvider);
+//}
 
-void GUI_Interface::sendToRoom(const std::string& roomName, void const * data, const int size) {
-  webSocketServer_.sendToRoom(roomName, data, size);
-}
+//void GUI_Interface::sendToRoom(const std::string& roomName, void const * data, const int size) {
+//  webSocketServer_.sendToRoom(roomName, data, size);
+//}
 
 //void GUI_Interface::received(boost::array<char, 1024ul> const& data){
 //    std::cout << "GUI_Interface::received - enter" << std::endl;

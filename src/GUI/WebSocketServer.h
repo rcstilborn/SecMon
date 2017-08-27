@@ -34,12 +34,12 @@ class WebSocketServer {
 
   void start();
 
-  void createRoom(const std::string& roomName, boost::function<const std::string()> welcomeMessageProvider);
-  void deleteRoom(const std::string& roomName);
-  int howManyInRoom(const std::string& roomName) const;
-  void sendToRoom(const std::string& roomName, const std::string& data);
-  void sendToOne(websocketpp::connection_hdl hdl, const std::string& roomName, const std::string& data);
-  void sendToRoom(const std::string& roomName, void const * data, const int size);
+//  void createRoom(const std::string& roomName, boost::function<const std::string()> welcomeMessageProvider);
+//  void deleteRoom(const std::string& roomName);
+//  int howManyInRoom(const std::string& roomName) const;
+//  void sendToRoom(const std::string& roomName, const std::string& data);
+//  void sendToOne(websocketpp::connection_hdl hdl, const std::string& roomName, const std::string& data);
+//  void sendToRoom(const std::string& roomName, void const * data, const int size);
   void shutdown();
 
  private:
@@ -67,9 +67,9 @@ class WebSocketServer {
   void on_message(websocketpp::connection_hdl hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg);
   void on_open(websocketpp::connection_hdl hdl);
   void on_close(websocketpp::connection_hdl hdl);
-  void joinRoom(websocketpp::connection_hdl hdl, const std::string& roomName);
-  void leaveRoom(websocketpp::connection_hdl hdl, const std::string& roomName);
-  room_list::iterator findRoom(const std::string& roomName);
+//  void joinRoom(websocketpp::connection_hdl hdl, const std::string& roomName);
+//  void leaveRoom(websocketpp::connection_hdl hdl, const std::string& roomName);
+//  room_list::iterator findRoom(const std::string& roomName);
 };
 
 #endif // GUI_WEBSOCKETSERVER_H_

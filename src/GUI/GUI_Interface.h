@@ -34,9 +34,9 @@ class GUI_Interface {
   void shutdown();
 
   // TODO(richard): Refactor away later
-  void sendToRoom(const std::string& roomName, void const * data, const int size);
-  void createRoom(const std::string& roomName, boost::function<const std::string()> welcomeMessageProvider);
-  void sendCameraList(const std::string& list);
+//  void sendToRoom(const std::string& roomName, void const * data, const int size);
+//  void createRoom(const std::string& roomName, boost::function<const std::string()> welcomeMessageProvider);
+//  void sendCameraList(const std::string& list);
 
  private:
   boost::asio::io_service& io_service;
