@@ -8,7 +8,7 @@
  *  Licensed under the MIT License
  */
 
-#include "OOI_Processor.h"
+#include "../ObjectProcessing/OOI_Processor.h"
 
 #include <boost/bind/bind.hpp>
 #include <opencv2/core/types.hpp>

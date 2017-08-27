@@ -18,7 +18,7 @@
 #include "FrameSequence.h"
 #include "ImageProcessing/ImageProcessor.h"
 #include "ImageSource/ImageSource.h"
-#include "OOI_Processing/OOI_Processor.h"
+#include "ObjectProcessing/OOI_Processor.h"
 #include "SceneInterface.h"
 
 class GUI_Interface;

@@ -5,9 +5,10 @@
  *      Author: richard
  */
 
+#include "../../src/ObjectProcessing/OOI.h"
+
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
-#include "../../src/OOI_Processing/OOI.h"
 
 
 TEST(OOI_getRectForDisplay, Normal) {

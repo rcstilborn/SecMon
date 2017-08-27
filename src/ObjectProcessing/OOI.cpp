@@ -8,7 +8,7 @@
  *  Licensed under the MIT License
  */
 
-#include "OOI.h"
+#include "../ObjectProcessing/OOI.h"
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core.hpp>

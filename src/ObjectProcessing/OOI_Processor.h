@@ -8,8 +8,8 @@
  *  Licensed under the MIT License
  */
 
-#ifndef OOI_PROCESSING_OOI_PROCESSOR_H_
-#define OOI_PROCESSING_OOI_PROCESSOR_H_
+#ifndef OBJECTPROCESSING_OOI_PROCESSOR_H_
+#define OBJECTPROCESSING_OOI_PROCESSOR_H_
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/strand.hpp>
@@ -20,7 +20,7 @@
 #include <map>
 #include <memory>
 
-#include "OOI.h"
+#include "../ObjectProcessing/OOI.h"
 
 class SceneInterface;
 class FrameSequence;
@@ -49,4 +49,4 @@ class OOI_Processor : private boost::noncopyable {
                       const std::shared_ptr<Frame>& frame0, int& newOOIs, std::vector<cv::Rect>& rois);
 };
 
-#endif // OOI_PROCESSING_OOI_PROCESSOR_H_
+#endif // OBJECTPROCESSING_OOI_PROCESSOR_H_

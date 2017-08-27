@@ -8,8 +8,8 @@
  *  Licensed under the MIT License
  */
 
-#ifndef OOI_PROCESSING_OOI_H_
-#define OOI_PROCESSING_OOI_H_
+#ifndef OBJECTPROCESSING_OOI_H_
+#define OBJECTPROCESSING_OOI_H_
 
 #include <boost/core/noncopyable.hpp>
 #include <opencv2/core/types.hpp>
@@ -60,4 +60,4 @@ class OOI : private boost::noncopyable {
   cv::Rect ResizeRect(const int delta, const int maxWidth, const int maxHeight) const;
 };
 
-#endif // OOI_PROCESSING_OOI_H_
+#endif // OBJECTPROCESSING_OOI_H_
