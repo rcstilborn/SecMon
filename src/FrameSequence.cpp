@@ -45,7 +45,7 @@ std::shared_ptr<Frame> FrameSequence::get_new_frame() {
     boost::lock_guard<boost::mutex> guard(frame_list_mtx_);
     this->frames_.insert(std::pair<const int, std::shared_ptr<Frame>>(frame_id, newFrame));
   }
-  if (frames_.size() > frame_maximum) {
+  if (frames_.size() > kFrameMaximum) {
     delete_earliest_frame();
   }
   return newFrame;

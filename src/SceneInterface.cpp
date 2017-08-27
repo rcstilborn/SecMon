@@ -67,4 +67,5 @@ void SceneInterface::publish(const int frameid) {
       } catch (std::exception& e) {
       }
     }
+  frame_sequence_.delete_frame(frameid);
 }

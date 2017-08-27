@@ -23,8 +23,8 @@
 #include <vector>
 #include <memory>
 
-const int frame_warning_level = 15;
-const int frame_maximum = 60;
+const int kFrameWarningLevel = 15;
+const int kFrameMaximum = 60;
 
 class Frame;
 
@@ -51,8 +51,8 @@ class FrameSequence {
   unsigned int height_ = 0;
 
   // Make sure we can't copy them
-  FrameSequence(const FrameSequence&);
-  FrameSequence& operator=(FrameSequence);
+  FrameSequence(const FrameSequence&) = delete;
+  FrameSequence& operator=(FrameSequence) = delete;
 };
 
 #endif // FRAMESEQUENCE_H_
