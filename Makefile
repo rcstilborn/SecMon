@@ -2,41 +2,10 @@
 # Project files
 #
 
-SRCS = \
-src/GUI/Connection.cpp \
-src/GUI/GUI_Interface.cpp \
-src/GUI/HTTP_Server.cpp \
-src/GUI/MimeTypes.cpp \
-src/GUI/Reply.cpp \
-src/GUI/RequestHandler.cpp \
-src/GUI/RequestParser.cpp \
-src/GUI/Stream.cpp \
-src/GUI/StreamConnection.cpp \
-src/GUI/StreamDirectory.cpp \
-src/GUI/WebSocketServer.cpp \
-src/ImageSource/Camera.cpp \
-src/ImageSource/ImageSource.cpp \
-src/ImageProcessing/ImageProcessor.cpp \
-src/ImageProcessing/MovementDetectorBasic.cpp \
-src/ImageProcessing/MovementDetector.cpp \
-src/ImageProcessing/ROI_Detector.cpp \
-src/OOI_Processing/OOI_Processor.cpp \
-src/OOI_Processing/OOI.cpp \
-src/Frame.cpp \
-src/FrameSequence.cpp \
-src/PerformanceMetrics.cpp \
-src/Scene.cpp \
-src/SceneInterface.cpp \
-src/SceneMonitor.cpp \
-src/SecurityMonitor.cpp
+SRCS = $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
+SRCS := $(filter-out %_Test.cpp, $(SRCS))
 
-
-
-SRCS_T = \
-test/FrameTest.cpp \
-test/ImageProcessing/ROI_DetectorTest.cpp \
-test/OOI_Processing/OOI_Test.cpp
-
+SRCS_T = $(wildcard src/*_Test.cpp) $(wildcard src/**/*_Test.cpp)
 
 OBJS = $(SRCS:.cpp=.o)
 OBJS_T = $(SRCS_T:.cpp=.o)
@@ -74,9 +43,9 @@ DBGCXXFLAGS = -pthread -DDEBUG -O0 -g3 -c -fmessage-length=0 -march=native -mmmx
 #
 # Unit test build settings
 #
-TSTDIR = testbuild
+TSTDIR = test
 TSTDEPDIR = .depend/$(TSTDIR)
-TSTEXE = $(TSTDIR)/$(EXE)Test
+TSTEXE = $(TSTDIR)/$(EXE)_Test
 TSTOBJS = $(filter-out debug/src/SecurityMonitor.o,$(DBGOBJS))
 TSTOBJS += $(addprefix $(TSTDIR)/, $(OBJS_T))
 #TSTOBJS += $(OBJS_T)
@@ -180,10 +149,9 @@ $(RELDIR)/:
 # Other rules
 #
 prep:
-	@mkdir -p $(DBGDIR) $(RELDIR) $(DEPDIR)
+	@mkdir -p $(DBGDIR) $(RELDIR) $(TSTDIR) $(DEPDIR)
 
 remake: clean all
 
 clean:
-	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS) $(TSTEXE) $(TSTOBJS)
-	rm -rf $(DEPDIR)
+	rm -rf $(DBGDIR) $(RELDIR) $(TSTDIR) $(DEPDIR)
