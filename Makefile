@@ -116,6 +116,7 @@ $(DBGDIR)/:
 # Test rules
 #
 test: $(TSTEXE)
+	$(TSTEXE)
 
 $(TSTEXE): $(TSTOBJS)
 	$(CXX) $(CXXFLAGS) -o $(TSTEXE) $^ $(TSTLINKER_FLAGS)
