@@ -28,7 +28,7 @@ Scene::Scene(const std::string& name, const std::string& url, boost::asio::io_se
                      boost::bind(&SceneInterface::publish, &scene_interface_, _1)),
       image_processor_(io_service, scene_interface_, frame_sequence_,
                        boost::bind(&OOI_Processor::process_next_frame, &ooi_processor_, _1)),
-      image_source_(name, url, io_service, scene_interface_, frame_sequence_,
+      image_source_(name, url, io_service, frame_sequence_,
                     boost::bind(&ImageProcessor::process_next_frame, &image_processor_, _1), fps) {
   DLOG(INFO)<< "Scene(" << name << ") - constructed";
 }

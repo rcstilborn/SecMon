@@ -26,12 +26,11 @@
 #include "../FrameSequence.h"
 
 ImageSource::ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service,
-                         SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void(const int)> next,
+                         FrameSequence& frameSequence, boost::function<void(const int)> next,
                          const int fps)
     : name_(name),
       interval_(1000 / fps),
       camera_(url),
-      scene_interface_(sceneIf),
       frame_sequence_(frameSequence),
       next_(next),
       timer_(io_service, std::chrono::milliseconds(interval_)),
@@ -39,7 +38,6 @@ ImageSource::ImageSource(const std::string& name, const std::string& url, boost:
       shutting_down_(false) {
   DLOG(INFO)<< "ImageSource(" << name << ") - constructed";
   frameSequence.setSize(camera_.get_width(), camera_.get_height());
-  //    gui.registerNewScene(sceneIf);
   // Reset and start the timer
   start_timer();
 }

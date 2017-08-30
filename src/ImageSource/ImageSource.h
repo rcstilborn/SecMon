@@ -30,7 +30,7 @@ class GUI_Interface;
 class ImageSource : private boost::noncopyable {
  public:
   ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service,
-              SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void(const int)> next,
+              FrameSequence& frameSequence, boost::function<void(const int)> next,
               const int fps = 1);
   virtual ~ImageSource();
 
@@ -50,7 +50,6 @@ class ImageSource : private boost::noncopyable {
   int interval_;
   Camera camera_;
 
-  SceneInterface& scene_interface_;
   FrameSequence& frame_sequence_;
 
   boost::function<void(const int)> next_;

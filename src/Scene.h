@@ -28,7 +28,6 @@ class Scene : private boost::noncopyable {
   Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui,
         const int fps = 1);
   virtual ~Scene();
-
   Camera& get_camera();
   FrameSequence& get_frame_sequence();
   const std::string& get_name() const;
@@ -38,7 +37,6 @@ class Scene : private boost::noncopyable {
 
  private:
   const std::string& name_;
-  //    int interval;
   FrameSequence frame_sequence_;
   SceneInterface scene_interface_;
   OOI_Processor ooi_processor_;
