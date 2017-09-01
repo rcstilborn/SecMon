@@ -83,7 +83,7 @@ void StreamConnection::sendInitialHeaders() {
                       boost::asio::placeholders::bytes_transferred)));
 }
 
-void StreamConnection::sendFrame(SceneInterface::image_ptr image) {
+void StreamConnection::sendFrame(ScenePublisher::image_ptr image) {
   message_ptr msg_ptr(new FrameToSend);
   msg_ptr->buffers_.push_back(boost::asio::buffer(FrameHeader));
   msg_ptr->buffers_.push_back(boost::asio::buffer(boost::lexical_cast<std::string>(image->size())));

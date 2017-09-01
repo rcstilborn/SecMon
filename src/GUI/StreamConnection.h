@@ -24,7 +24,7 @@
 #include <vector>
 #include <memory>
 
-#include "../SceneInterface.h"
+#include "../ScenePublisher.h"
 #include "Connection.h"
 #include "Reply.h"
 #include "Request.h"
@@ -41,7 +41,7 @@ class StreamConnection : public std::enable_shared_from_this<StreamConnection>, 
   void start();
 
   void sendInitialHeaders();
-  void sendFrame(SceneInterface::image_ptr image);
+  void sendFrame(ScenePublisher::image_ptr image);
 
  private:
   /// Handle completion of a read operation.

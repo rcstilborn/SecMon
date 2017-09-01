@@ -14,53 +14,73 @@
 #include <boost/bind/arg.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/bind/placeholders.hpp>
-
+#include <boost/any.hpp>
 #include <iostream>
 #include <string>
+#include <memory>
+#include <utility>
+#include "ImageProcessing/ImageProcessor.h"
+#include "ImageSource/ImageSource.h"
+#include "ObjectProcessing/OOI_Processor.h"
+#include "Pipeline/Pipeline.h"
+#include "Component.h"
+#include "ScenePublisher.h"
 
-Scene::Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui,
+Scene::Scene(const std::string& name, const std::string& url,
+             boost::asio::io_service& io_service, GUI_Interface& gui,
              const int fps)
     : name_(name),
-      //  interval(1000/fps),
-      frame_sequence_(),  // camera.getHeight(), camera.getWidth()),
-      scene_interface_(name, "Description here", gui, frame_sequence_),
-      ooi_processor_(io_service, scene_interface_, frame_sequence_,
-                     boost::bind(&SceneInterface::publish, &scene_interface_, _1)),
-      image_processor_(io_service, scene_interface_, frame_sequence_,
-                       boost::bind(&OOI_Processor::process_next_frame, &ooi_processor_, _1)),
-      image_source_(name, url, io_service, frame_sequence_,
-                    boost::bind(&ImageProcessor::process_next_frame, &image_processor_, _1), fps) {
-  DLOG(INFO)<< "Scene(" << name << ") - constructed";
-}
+      components_(),
+      pipeline_(io_service) {
 
-Scene::~Scene() {
-  //    std::cout << "~Scene() - enter" << std::endl;
-  //    std::cout << "~Scene() - destructed " << count << std::endl;
-}
+  // Construct the image source and add it to the pipeline
+  std::shared_ptr<ImageSource> is_ptr(new ImageSource(url));
+  pipeline_.addTimedElement(pipeline::TimerType::Interval, 1000/fps,
+                            boost::bind(&ImageSource::process_next_frame, is_ptr, boost::placeholders::_1));
+  components_.push_back(is_ptr);
 
-FrameSequence& Scene::get_frame_sequence() {
-  return this->frame_sequence_;
-}
+  // Construct the image processor and add it to the pipeline
+  std::shared_ptr<ImageProcessor> ip_ptr(new ImageProcessor());
+  pipeline_.addElement(boost::bind(&ImageProcessor::process_next_frame, ip_ptr, boost::placeholders::_1));
+  components_.push_back(ip_ptr);
+
+  // Construct the publisher and add it to the pipeline
+  std::shared_ptr<ScenePublisher> sp_ptr(new ScenePublisher(name, "Description here", gui));
+  pipeline_.addElement(boost::bind(&ScenePublisher::process_next_frame, sp_ptr, boost::placeholders::_1));
+  components_.push_back(sp_ptr);
+
+  pipeline_.compile();
+
+  pipeline_.start();
+//  components_.push_back(std::unique_ptr<WorkWrapper>(
+//      new OOI_Processor ooi_processor(scene_interface_, frame_sequence_));
+//  components_.push_back(std::unique_ptr<WorkWrapper>(
+//      new ImageProcessor image_processor_(scene_interface_, frame_sequence_));
+    DLOG(INFO)<< "Scene(" << name << ", " << url << ", " << fps << "fps) - constructed";
+  }
+
+  Scene::~Scene() {
+    components_.clear();
+  }
 
 const std::string& Scene::get_name() const {
   return this->name_;
 }
 
 void Scene::shutdown() {
-  //    std::cout << "Scene::shutdown() " << name << std::endl;
-  image_source_.shutdown();
+  pipeline_.pause();
 }
 
 void Scene::toggle_pause() {
   isPaused_ = !isPaused_;
-  image_source_.toggle_pause();
+  pipeline_.pause();
   if (isPaused_)
-    std::cout << "Pausing..." << std::endl;
+  std::cout << "Pausing..." << std::endl;
   else
-    std::cout << "Resuming..." << std::endl;
+  std::cout << "Resuming..." << std::endl;
 }
 
 void Scene::set_frames_per_second(const int fps) {
-  image_source_.set_frames_per_second(fps);
+  pipeline_.change_timer(1000/fps);
   DLOG(INFO)<< "Setting FPS to " << fps;
 }

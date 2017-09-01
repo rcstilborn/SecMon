@@ -31,7 +31,7 @@ StreamDirectory::~StreamDirectory() {
   stream_list_.clear();
 }
 
-void StreamDirectory::addStream(SceneInterface::Stream& stream) {
+void StreamDirectory::addStream(ScenePublisher::Stream& stream) {
   boost::lock_guard<boost::mutex> guard(stream_list_mtx_);
   std::shared_ptr<Stream> stream_ptr(new Stream(stream.image_ready, ++stream_id));
   DLOG(INFO)<< "StreamDirectory::addStream() - " << stream.name << " mapped to " << stream_id << ".mjpeg";

@@ -1,5 +1,5 @@
 /*
- * SceneInterface.cpp
+ * ScenePublisher.cpp
  *
  *  Created on: Aug 13, 2015
  *      Author: richard
@@ -8,64 +8,62 @@
  *  Licensed under the MIT License
  */
 
-#include "SceneInterface.h"
+#include "ScenePublisher.h"
 
 #include <boost/thread/lock_guard.hpp>
 
 #include <string>
 #include <memory>
-
+#include <iostream>
 #include "Frame.h"
-#include "FrameSequence.h"
 #include "GUI/GUI_Interface.h"
 
-SceneInterface::SceneInterface(const std::string& display_name, const std::string& description, GUI_Interface& gui,
-                               FrameSequence& frame_sequence)
+ScenePublisher::ScenePublisher(const std::string& display_name, const std::string& description, GUI_Interface& gui)
     : display_name_(display_name),
       description_(description),
       gui_(gui),
-      frame_sequence_(frame_sequence),
       streams_list_mtx_(),
       streams_() {
   add_stream("main");
+  add_stream("difference");
+  add_stream("foreground");
 }
 
-SceneInterface::~SceneInterface() {
+ScenePublisher::~ScenePublisher() {
 }
 
-const std::string& SceneInterface::get_description() const {
+const std::string& ScenePublisher::get_description() const {
   return description_;
 }
 
-const std::string& SceneInterface::get_display_name() const {
+const std::string& ScenePublisher::get_display_name() const {
   return display_name_;
 }
 
-void SceneInterface::add_stream(const std::string& name) {
+void ScenePublisher::add_stream(const std::string& name) {
   boost::lock_guard<boost::mutex> guard(streams_list_mtx_);
-  std::shared_ptr<SceneInterface::Stream> stream_ptr(new SceneInterface::Stream(name));
+  std::shared_ptr<ScenePublisher::Stream> stream_ptr(new ScenePublisher::Stream(name));
   streams_.push_back(stream_ptr);
   // TODO(richard): Should pass the shared_ptr
   gui_.registerNewStream(*stream_ptr);
   return;
 }
-// boost::signals2::connection SceneInterface::connect(const
+// boost::signals2::connection ScenePublisher::connect(const
 // image_ready_signal::slot_type &subscriber)
 //{
 //    return image_ready.connect(subscriber);
 //}
 //
-// void SceneInterface::trigger(image_ptr image) {
+// void ScenePublisher::trigger(image_ptr image) {
 //    image_ready(image);
 //}
 
-void SceneInterface::publish(const int frameid) {
+void ScenePublisher::process_next_frame(std::shared_ptr<Frame>& frame) {
   for (auto stream : streams_)
     if (stream->image_ready.num_slots() > 0) {
       try {
-        stream->image_ready(frame_sequence_.get_frame(frameid)->get_image_as_jpg(stream->name));
+        stream->image_ready(frame->get_image_as_jpg(stream->name));
       } catch (std::exception& e) {
       }
     }
-  frame_sequence_.delete_frame(frameid);
 }

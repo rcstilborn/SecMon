@@ -37,49 +37,29 @@
 
 #include <boost/asio/io_service.hpp>
 #include <boost/function.hpp>
-#include <boost/any.hpp>
 #include <memory>
 #include <vector>
+#include <exception>
+#include <iostream>
+#include <utility>
+#include "TimedWorkWrapper.h"
 #include "WorkWrapper.h"
 
 namespace pipeline {
 
-/*
- * wrapper for a basic (not first) element
- * Must provide a function that takes a shared pointer and returns void
- */
-struct Element{
-  Element() = delete;
-  explicit Element(boost::function<void(std::shared_ptr<boost::any>)> work) : work_(work) {}
-  boost::function<void(std::shared_ptr<boost::any>)> work_;  // This is the work that gets done
-};
-
-/*
- * TimerType:
- *   Interval means the output happens every x milliseconds
- *   Delay means there is x milliseconds between each attempt to get the data
- */
 enum TimerType { Interval, Delay };
 
-struct TimedElement{
-  TimedElement() = delete;
-  TimedElement(TimerType timer_type, const int milliseconds, boost::function<void(std::shared_ptr<boost::any>)> work)
-  : work_(work), timer_type_(timer_type), milliseconds_(milliseconds) {}
-  boost::function<void(std::shared_ptr<boost::any>)> work_;  // This is the work that gets done
-  TimerType timer_type_;
-  unsigned int milliseconds_;
-};
-
+template <class T>
 class Pipeline {
  public:
   Pipeline() = delete;
   explicit Pipeline(boost::asio::io_service& io_service);
   virtual ~Pipeline();
 
-  void add(TimedElement te);
+  void addTimedElement(TimerType, const int, boost::function<void(std::shared_ptr<T>&)>);
   // TODO(Richard): Add blocking element type for webcam feeds
-  // void add(BlockingElement be);
-  void add(Element e);
+  // void addBlockingElement(boost::function<void(T)> work);
+  void addElement(boost::function<void(std::shared_ptr<T>&)> work);
   void change_timer(const unsigned int milliseconds);
   void compile();
   void pause();
@@ -93,9 +73,84 @@ class Pipeline {
   bool paused_ = false;
   bool started_ = false;
   bool compiled_ = false;
-  std::vector<std::unique_ptr<WorkWrapper>> elements_;
+  std::vector<std::unique_ptr<WorkWrapper<T>>> elements_;
+
+  // Make sure we can't copy them
+  Pipeline(const Pipeline&) = delete;
+  Pipeline& operator=(Pipeline) = delete;
 };
+
+template <class T>
+Pipeline<T>::Pipeline(boost::asio::io_service& io_service)
+  : io_service_(io_service),
+    elements_() {
+}
+
+template <class T>
+Pipeline<T>::~Pipeline() {
+}
+
+template <class T>
+void Pipeline<T>::addTimedElement(TimerType /*timer_type*/,
+                                  const int interval, boost::function<void(std::shared_ptr<T>&)> work) {
+  if (compiled_) throw "Can't add elements once the pipeline has been compiled";
+  if (!elements_.empty()) throw "Can only add TimedElement to an empty pipeline";
+  elements_.emplace_back(new TimedWorkWrapper<T>(io_service_, work, interval));
+}
+
+template <class T>
+void Pipeline<T>::addElement(boost::function<void(std::shared_ptr<T>&)> work) {
+  if (compiled_) throw "Can't add elements once the pipeline has been compiled";
+  if (elements_.empty()) throw "Can only add regular Elements after a TimedElement or BlockingElement has been added";
+  elements_.emplace_back(new WorkWrapper<T>(io_service_, work));
+}
+
+template <class T>
+void Pipeline<T>::compile() {
+  if (elements_.size() > 1) {
+    auto it_n_minus_1 = elements_.begin();
+    auto it_n = elements_.begin();
+    ++it_n;
+//    std::cout << "Size now: " << elements_.size() << std::endl;
+    while (it_n != elements_.end()) {
+//      std::cout << "it_n_minus_1: " << it_n_minus_1 - elements_.begin()
+//                << ". it_n: " << it_n - elements_.begin() << std::endl;
+      (*it_n_minus_1)->set_next((*it_n)->get_schedule_work());
+      ++it_n_minus_1;
+      ++it_n;
+    }
+  }
+  compiled_ = true;
+}
+
+template <class T>
+void Pipeline<T>::pause() {
+  if (!compiled_) throw "Can't perform pause operation before pipeline is compiled";
+  if (!started_) throw "Can't perform pause operation before pipeline is started";
+  elements_.front()->pause();
+  if (paused_)
+    paused_ = false;
+  else
+    paused_ = true;
+}
+
+template <class T>
+void Pipeline<T>::start() {
+  if (!compiled_) throw "Can't perform start operation before pipeline is compiled";
+  if (started_) throw "Pipeline has already been started!";
+  auto dummy_data = std::shared_ptr<T>(nullptr);
+  elements_.front()->schedule_work(dummy_data);
+  started_ = true;
+}
+
+template <class T>
+void Pipeline<T>::change_timer(const unsigned int milliseconds) {
+  if (!compiled_) throw "Can't perform change_timer operation before pipeline is compiled";
+  std::cout << "Would be changing the timer to: " << milliseconds << std::endl;
+}
+
 } // namespace pipeline
+
 
 #endif // PIPELINE_PIPELINE_H_
 

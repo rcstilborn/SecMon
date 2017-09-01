@@ -100,35 +100,41 @@ void ROI_Detector::consolidate_rectangles(std::vector<cv::Rect>& rects) {
   }
 }
 
-void ROI_Detector::processFrame(std::shared_ptr<Frame> frame0) {
-  cv::Mat& foreground = frame0->get_image("foreground");
-  cv::Mat& overlayImage = frame0->get_overlay_image();
+void ROI_Detector::processFrame(std::shared_ptr<Frame>& current_frame) {
+  try {
+    cv::Mat& foreground = current_frame->get_image("foreground");
+    cv::Mat& overlay_image = current_frame->get_overlay_image();
 
-  // Find the contours
-  cv::Mat temp;
-  foreground.copyTo(temp);
-  std::vector<std::vector<cv::Point> > contours;
-  std::vector<cv::Vec4i> hierarchy;
-  cv::findContours(temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);  // retrieves external contours
+    // Find the contours
+    cv::Mat temp;
+    foreground.copyTo(temp);
 
-  // Remove the small ones
-  contours.erase(std::remove_if(contours.begin(), contours.end(), ROI_Detector::is_too_small_), contours.end());
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    // retrieve external contours
+    cv::findContours(temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
-  cv::drawContours(overlayImage, contours, -1, cv::Scalar(0, 255, 0), 2);
-  // Build the list of rectangles
-  std::vector<cv::Rect>& rects = frame0->get_regions_of_interest();
-  for (auto contour : contours)
-    rects.push_back(cv::boundingRect(contour));
+    // Remove the small ones
+    contours.erase(std::remove_if(contours.begin(), contours.end(), ROI_Detector::is_too_small_), contours.end());
 
-  // Sort the list
-  std::sort(rects.begin(), rects.end(), ROI_Detector::compare_rect_size_);
+    cv::drawContours(overlay_image, contours, -1, cv::Scalar(0, 255, 0), 2);
+    // Build the list of rectangles
+    std::vector<cv::Rect>& rects = current_frame->get_regions_of_interest();
+    for (auto contour : contours)
+      rects.push_back(cv::boundingRect(contour));
 
-  // Remove the nested rectangles
-  // Start from the small end - only need to compare rectangles with >= ones.
-  consolidate_rectangles(rects);
+    // Sort the list
+    std::sort(rects.begin(), rects.end(), ROI_Detector::compare_rect_size_);
 
-//    for(auto rect : rects) {
-////        std::cout << rect.area() << std::endl;
-//        cv::rectangle(overlayImage, rect, cv::Scalar(0, 255, 0), 2);
-//    }
+    // Remove the nested rectangles
+    // Start from the small end - only need to compare rectangles with >= ones.
+    consolidate_rectangles(rects);
+
+  //    for(auto rect : rects) {
+  ////        std::cout << rect.area() << std::endl;
+  //        cv::rectangle(overlayImage, rect, cv::Scalar(0, 255, 0), 2);
+  //    }
+  } catch (std::exception& e) {
+    return;
+  }
 }

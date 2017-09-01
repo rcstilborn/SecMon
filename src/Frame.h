@@ -21,17 +21,20 @@
 #include <vector>
 #include <chrono>
 
-#include "SceneInterface.h"
+// TODO(richard): refactor away
+#include "ScenePublisher.h"
 
 const int kMaxImagesPerFrame = 10;
 
 class Frame {
  public:
-  Frame(const int frame_id, const int width, const int height);
+  Frame() = delete;
+  Frame(const int width, const int height);
+//  Frame(const int frame_id, const int width, const int height);
   virtual ~Frame();
 
   void set_start_time();
-  int get_frame_id() const;
+//  int get_frame_id() const;
 
   cv::Mat& get_original_image();
   cv::Mat& get_overlay_image();
@@ -39,15 +42,15 @@ class Frame {
   cv::Mat& get_new_image(const std::string& name);
   cv::Mat& get_new_blank_image(const std::string& name);
   cv::Mat& get_image(const std::string& name);
-  SceneInterface::image_ptr get_image_as_jpg(const std::string& name);
-  SceneInterface::image_ptr get_image_as_jpg(const std::string& name1, const std::string& name2);
-  SceneInterface::image_ptr get_original_image_as_jpg();
-  SceneInterface::image_ptr get_original_with_overlay_image_as_jpg();
+  ScenePublisher::image_ptr get_image_as_jpg(const std::string& name);
+  ScenePublisher::image_ptr get_image_as_jpg(const std::string& name1, const std::string& name2);
+  ScenePublisher::image_ptr get_original_image_as_jpg();
+  ScenePublisher::image_ptr get_original_with_overlay_image_as_jpg();
   const std::vector<cv::Rect>& getRoIs() const;
   std::vector<cv::Rect>& get_regions_of_interest();
 
  private:
-  const int frame_id_;
+//  const int frame_id_;
   // Make sure we can't copy them
   Frame(const Frame&) = delete;
   Frame& operator=(Frame) = delete;

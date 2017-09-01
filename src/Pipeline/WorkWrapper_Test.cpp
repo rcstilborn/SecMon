@@ -22,7 +22,7 @@ void test_function(const int i) {
 TEST(WorkWrapperConstruct, Success) {
   boost::asio::io_service io_service;
   try {
-    pipeline::WorkWrapper ww(io_service, boost::bind(test_function, 1));
+    pipeline::WorkWrapper<const int> ww(io_service, boost::bind(test_function, 1));
   } catch (const char* msg) {
     FAIL()<< msg;
   }

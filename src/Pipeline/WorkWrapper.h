@@ -18,50 +18,63 @@
 
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
-#include <boost/any.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <memory>
+#include <stdexcept>
+#include <iostream>
 
 namespace pipeline {
 
+//class PipelineData;
+template <class T>
 class WorkWrapper {
  public:
   WorkWrapper() = delete;
-  explicit WorkWrapper(boost::asio::io_service& io_service, boost::function<void(std::shared_ptr<boost::any>)> work);
+  explicit WorkWrapper(boost::asio::io_service& io_service, boost::function<void(std::shared_ptr<T>&)> work);
   virtual ~WorkWrapper();
-  virtual void schedule_work(std::shared_ptr<boost::any>);
+  virtual void schedule_work(std::shared_ptr<T>&);
   virtual void pause() {}
 
-  void set_next(boost::function<void(std::shared_ptr<boost::any>)> next) {next_ = next;}
-  boost::function<void(std::shared_ptr<boost::any>)> get_schedule_work() {
-    return boost::bind(&WorkWrapper::schedule_work, this, boost::placeholders::_1); }
+  void set_next(boost::function<void(std::shared_ptr<T>&)> next) {next_ = next;}
+  boost::function<void(std::shared_ptr<T>&)> get_schedule_work() {
+    return boost::bind(&WorkWrapper<T>::schedule_work, this, boost::placeholders::_1); }
 
  protected:
   boost::asio::strand strand_;
-  boost::function<void(std::shared_ptr<boost::any>)> work_;  // This is the work that gets done
-  boost::function<void(std::shared_ptr<boost::any>)> next_;  // This points to schedule_work of next element
-  virtual void do_work(std::shared_ptr<boost::any>);
-
- private:
+  boost::function<void(std::shared_ptr<T>&)> work_;  // This is the work that gets done
+  boost::function<void(std::shared_ptr<T>&)> next_;  // This points to schedule_work of next element
+  virtual void do_work(std::shared_ptr<T>&);         // This calls work_ then next_
 };
+
+template <class T>
+WorkWrapper<T>::WorkWrapper(boost::asio::io_service& io_service,
+                         boost::function<void(std::shared_ptr<T>&)> work)
+: strand_(io_service), work_(work), next_() {
+}
+
+template <class T>
+WorkWrapper<T>::~WorkWrapper() {
+}
+
+template <class T>
+void WorkWrapper<T>::schedule_work(std::shared_ptr<T>& data) {
+//  std::cout << "WorkWrapper schedule_work" << std::endl;
+  strand_.post(boost::bind(&WorkWrapper<T>::do_work, this, data));
+}
+
+template <class T>
+void WorkWrapper<T>::do_work(std::shared_ptr<T>& data) {
+//  std::cout << "WorkWrapper do_work" << std::endl;
+
+  // Record Time
+  work_(data);
+  // Record Time
+  if (!next_.empty()) {
+//    std::cout << "WorkWrapper schedule next work" << std::endl;
+    next_(data);
+  }
+}
 } // namespace pipeline
 
 #endif // PIPELINE_WORKWRAPPER_H_
-
-
-//Element (fn(data))
-//Start
-//Pause
-//Process next sets strand post for process
-//Process
-//    Time
-//     Call fn passing data
-//     Time
-//     If Next then next & return true (means there is more)
-//    Else return false so pipeline can delete data(?)
-
-
-// FirstElementTimedInterval(ms, fn)) - sets time from last timer
-// FirstElementTimedDelay(ms, fn) - sets time from end of execution
-// FirstElementBlocking(fn) - calls execute repeatedly

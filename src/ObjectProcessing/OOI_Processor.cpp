@@ -20,11 +20,10 @@
 #include <memory>
 
 #include "../Frame.h"
-#include "../FrameSequence.h"
 
 //static int VERY_CLOSE = 90;
 
-OOI_Processor::OOI_Processor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence,
+OOI_Processor::OOI_Processor(boost::asio::io_service& io_service, ScenePublisher& sceneIf,
                              boost::function<void(const int)> next)
     : strand_(io_service),
 //  caffeClassifier("/usr/local/caffe-master/models/bvlc_reference_caffenet/deploy.prototxt",
@@ -32,7 +31,6 @@ OOI_Processor::OOI_Processor(boost::asio::io_service& io_service, SceneInterface
 //          "/usr/local/caffe-master/data/ilsvrc12/imagenet_mean.binaryproto",
 //          "/usr/local/caffe-master/data/ilsvrc12/synset_words.txt"),
       scene_interface_(sceneIf),
-      frame_sequence_(frameSequence),
       next_(next),
       ooi_list_() {
 }
@@ -55,14 +53,7 @@ void OOI_Processor::create_new_ooi(std::vector<cv::Rect>::iterator rois_it, cons
 }
 #pragma GCC diagnostic error "-Wunused-parameter"
 
-void OOI_Processor::process_frame(const int frameId) {
-  std::shared_ptr<Frame> frame0;
-  try {
-    frame0 = frame_sequence_.get_frame(frameId);
-  } catch (std::exception& e) {
-    LOG(WARNING)<< "OOI_Processor::processFrame - exception getting frame " << frameId << ". ";
-    return;
-  }
+void OOI_Processor::process_frame(const int /*current_frame*/) {
 
 //    // Copy the ROIs so we can delete the ones we have processed
 //    std::vector<cv::Rect> rois = frame0->getRoIs();
@@ -161,7 +152,6 @@ void OOI_Processor::process_frame(const int frameId) {
 //            ", deletedOOIS " << deletedOOIs << ", ROIs " << frame0->getRoIs().size() <<
 //            ", OOIs " << ooiList.size() << std::endl;
 
-  next_(frameId);
   //   std::cout << "OOI_Processor::processFrame(" << frameId << ")" << std::endl;
 }
 

@@ -16,13 +16,13 @@
 #include <boost/function.hpp>
 #include <string>
 
-#include "../SceneInterface.h"
+#include "../ScenePublisher.h"
 #include "HTTP_Server.h"
 #include "StreamDirectory.h"
 #include "WebSocketServer.h"
 
 class SceneMonitor;
-class SceneInterface;
+class ScenePublisher;
 
 class GUI_Interface {
  public:
@@ -30,7 +30,7 @@ class GUI_Interface {
   virtual ~GUI_Interface();
 
   void start();
-  void registerNewStream(SceneInterface::Stream& stream);
+  void registerNewStream(ScenePublisher::Stream& stream);
   void shutdown();
 
   // TODO(richard): Refactor away later

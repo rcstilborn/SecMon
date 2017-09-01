@@ -16,7 +16,7 @@ EXE  = SecMon
 #
 CXX	 = g++
 # std::enable_shared_for_this requires -Wno-non-virtual-dtor
-CXXFLAGS = -Wall -Werror -Wextra -std=c++11 -Weffc++ -Wno-non-virtual-dtor
+CXXFLAGS = -Wall -Werror -Wextra -std=c++14 -Weffc++ -Wno-non-virtual-dtor
 %.o : %.cpp
 
 #

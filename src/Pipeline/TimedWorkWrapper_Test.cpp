@@ -22,7 +22,7 @@ void ttw_test_function(const int i) {
 TEST(TimedWorkWrapperConstruct, Success) {
   boost::asio::io_service io_service;
   try {
-    pipeline::TimedWorkWrapper tww(io_service, boost::bind(ttw_test_function, 1), 11);
+    pipeline::TimedWorkWrapper<const int> tww(io_service, boost::bind(ttw_test_function, 1), 11);
   } catch (const char* msg) {
     FAIL() << msg;
   }

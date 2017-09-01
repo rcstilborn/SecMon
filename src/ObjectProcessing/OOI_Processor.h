@@ -22,14 +22,12 @@
 
 #include "../ObjectProcessing/OOI.h"
 
-class SceneInterface;
-class FrameSequence;
+class ScenePublisher;
 class Frame;
 
 class OOI_Processor : private boost::noncopyable {
  public:
-  OOI_Processor(boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence,
-                boost::function<void(const int)> next);
+  OOI_Processor(boost::asio::io_service& io_service, ScenePublisher& sceneIf, boost::function<void(const int)> next);
   virtual ~OOI_Processor();
   void process_next_frame(const int frameId);
   void classify_this(std::shared_ptr<Frame> frame0, OOI* newOOI);
@@ -39,8 +37,7 @@ class OOI_Processor : private boost::noncopyable {
   boost::asio::io_service::strand strand_;
 //    Classifier caffeClassifier;
 
-  SceneInterface& scene_interface_;
-  FrameSequence& frame_sequence_;
+  ScenePublisher& scene_interface_;
   boost::function<void(const int)> next_;
   unsigned int next_ooi_id_ = 0;
   std::map<unsigned int, std::shared_ptr<OOI>> ooi_list_;

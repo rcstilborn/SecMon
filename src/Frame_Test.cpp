@@ -14,7 +14,7 @@
 #include "../src/Frame.h"
 
 
-TEST(Frame_Constructor, one) {
-    Frame f(1, 1920, 1080);
-    EXPECT_EQ(f.get_frame_id(), 1) << "Expected frame id to be 1, got: " << f.get_frame_id();
-}
+//TEST(Frame_Constructor, one) {
+//    Frame f(1, 1920, 1080);
+//    EXPECT_EQ(f.get_frame_id(), 1) << "Expected frame id to be 1, got: " << f.get_frame_id();
+//}

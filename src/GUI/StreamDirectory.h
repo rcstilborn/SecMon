@@ -18,7 +18,7 @@
 #include <string>
 #include <memory>
 
-#include "../SceneInterface.h"
+#include "../ScenePublisher.h"
 #include "Connection.h"
 #include "Stream.h"
 
@@ -29,7 +29,7 @@ class StreamDirectory : private boost::noncopyable {
   explicit StreamDirectory(boost::asio::io_service& io_service);
   virtual ~StreamDirectory();
   bool handleValidStream(const std::string& streamRequest, http::connection_ptr conn);
-  void addStream(SceneInterface::Stream& stream);
+  void addStream(ScenePublisher::Stream& stream);
 //    void addStream(const std::string& name,
 //                   boost::signals2::signal<void (std::shared_ptr<std::vector<unsigned char>>)> signal);
 

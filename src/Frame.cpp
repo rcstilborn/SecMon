@@ -21,8 +21,8 @@
 #include <vector>
 #include <chrono>
 
-Frame::Frame(const int frame_id, const int width, const int height)
-    : frame_id_(frame_id),
+Frame::Frame(const int width, const int height)
+    : //frame_id_(frame_id),
       frame_size_(width, height),
       start_time_(),
       regions_of_interest_() {
@@ -79,29 +79,29 @@ cv::Mat& Frame::get_image(const std::string& name) {
   throw std::invalid_argument("No image registered with name " + name);
 }
 
-SceneInterface::image_ptr Frame::get_image_as_jpg(const std::string& name) {
+ScenePublisher::image_ptr Frame::get_image_as_jpg(const std::string& name) {
   // TODO(richard): make this hack more elegant
   if (name == "main")
     return get_original_with_overlay_image_as_jpg();
   cv::Mat& image = get_image(name);
   if (!image.empty()) {
-    SceneInterface::image_ptr buffer(new std::vector<unsigned char>());
+    ScenePublisher::image_ptr buffer(new std::vector<unsigned char>());
     cv::imencode(".jpg", image, *buffer);
     return buffer;
   }
   throw std::invalid_argument("No data in image with name " + name);
 }
 
-SceneInterface::image_ptr Frame::get_original_image_as_jpg() {
+ScenePublisher::image_ptr Frame::get_original_image_as_jpg() {
   if (!images_[0].empty()) {
-    SceneInterface::image_ptr buffer(new std::vector<unsigned char>());
+    ScenePublisher::image_ptr buffer(new std::vector<unsigned char>());
     cv::imencode(".jpg", images_[0], *buffer);
     return buffer;
   }
   throw std::invalid_argument("No data in original image");
 }
 
-SceneInterface::image_ptr Frame::get_image_as_jpg(const std::string& name1, const std::string& name2) {
+ScenePublisher::image_ptr Frame::get_image_as_jpg(const std::string& name1, const std::string& name2) {
   cv::Mat& image1 = get_image(name1);
   if (image1.empty())
     throw std::invalid_argument("Frame::getImageAsJPG - No data in image with name " + name1);
@@ -110,18 +110,20 @@ SceneInterface::image_ptr Frame::get_image_as_jpg(const std::string& name1, cons
   if (!image2.empty()) {
     image2.copyTo(image1);
   }
-  SceneInterface::image_ptr buffer(new std::vector<unsigned char>());
+  ScenePublisher::image_ptr buffer(new std::vector<unsigned char>());
   cv::imencode(".jpg", image1, *buffer);
   return buffer;
 }
 
-SceneInterface::image_ptr Frame::get_original_with_overlay_image_as_jpg() {
+ScenePublisher::image_ptr Frame::get_original_with_overlay_image_as_jpg() {
   if (images_[0].empty())
     throw std::invalid_argument("No data in original image");
 
-  images_[1].copyTo(images_[0], images_[1]);
-  SceneInterface::image_ptr buffer(new std::vector<unsigned char>());
-  cv::imencode(".jpg", images_[0], *buffer);
+  cv::Mat new_image;
+  images_[0].copyTo(new_image);
+  images_[1].copyTo(new_image, images_[1]);
+  ScenePublisher::image_ptr buffer(new std::vector<unsigned char>());
+  cv::imencode(".jpg", new_image, *buffer);
   return buffer;
 }
 
@@ -129,9 +131,9 @@ void Frame::set_start_time() {
   this->start_time_ = std::chrono::high_resolution_clock::now();
 }
 
-int Frame::get_frame_id() const {
-  return frame_id_;
-}
+//int Frame::get_frame_id() const {
+//  return frame_id_;
+//}
 
 const std::vector<cv::Rect>& Frame::getRoIs() const {
   return regions_of_interest_;

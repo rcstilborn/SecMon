@@ -19,7 +19,7 @@ class Frame;
 
 class MovementDetector {
  public:
-  virtual void process_frame(std::shared_ptr<Frame> frame0) = 0;
+  virtual void process_frame(std::shared_ptr<Frame>& frame) = 0;
   virtual ~MovementDetector();
 };
 

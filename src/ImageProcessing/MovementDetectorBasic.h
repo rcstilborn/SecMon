@@ -21,11 +21,12 @@ class MovementDetectorBasic : public MovementDetector {
   MovementDetectorBasic();
   virtual ~MovementDetectorBasic();
 
-  void process_frame(std::shared_ptr<Frame> frame0);
+  void process_frame(std::shared_ptr<Frame>& frame);
 
  private:
   void search_for_movement(cv::Mat thresholdImage, cv::Mat &cameraFeed);
-  cv::Mat previous_image_;
+  std::shared_ptr<Frame> previous_frame_;
+  unsigned int frames_since_last_diff_ = 0;
 };
 
 #endif // IMAGEPROCESSING_MOVEMENTDETECTORBASIC_H_

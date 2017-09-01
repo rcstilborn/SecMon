@@ -37,7 +37,7 @@ void GUI_Interface::shutdown() {
 //    httpServer_.shutdown();
 }
 
-void GUI_Interface::registerNewStream(SceneInterface::Stream& stream) {
+void GUI_Interface::registerNewStream(ScenePublisher::Stream& stream) {
   streamDirectory_.addStream(stream);
 }
 

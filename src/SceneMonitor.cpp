@@ -49,7 +49,7 @@ void SceneMonitor::start_monitoring(const std::string& name, const std::string& 
 
   // Create the scene
   {
-    Scene* scene = new Scene(name, url, io_service_, gui_, 10);
+    Scene* scene = new Scene(name, url, io_service_, gui_, 5);
     boost::lock_guard<boost::mutex> guard(scenes_mtx_);
     // TODO(richard): Fix this silliness!
     std::string foo(name);

@@ -11,25 +11,22 @@
 #ifndef SCENE_H_
 #define SCENE_H_
 
-#include <boost/core/noncopyable.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/any.hpp>
 #include <cstdbool>
 #include <string>
-
-#include "FrameSequence.h"
-#include "ImageProcessing/ImageProcessor.h"
-#include "ImageSource/ImageSource.h"
-#include "ObjectProcessing/OOI_Processor.h"
-#include "SceneInterface.h"
+#include <memory>
+#include <vector>
+#include "Pipeline/Pipeline.h"
+#include "Component.h"
 
 class GUI_Interface;
 
-class Scene : private boost::noncopyable {
+class Scene {
  public:
   Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui,
         const int fps = 1);
   virtual ~Scene();
-  Camera& get_camera();
-  FrameSequence& get_frame_sequence();
   const std::string& get_name() const;
   void shutdown();
   void toggle_pause();
@@ -37,13 +34,13 @@ class Scene : private boost::noncopyable {
 
  private:
   const std::string& name_;
-  FrameSequence frame_sequence_;
-  SceneInterface scene_interface_;
-  OOI_Processor ooi_processor_;
-  ImageProcessor image_processor_;
-  ImageSource image_source_;
-
+  std::vector<std::shared_ptr<Component>> components_;
+  pipeline::Pipeline<Frame> pipeline_;
   bool isPaused_ = false;
+
+  // Make sure we can't copy them
+  Scene(const Scene&) = delete;
+  Scene& operator=(Scene) = delete;
 };
 
 #endif  // SCENE_H_

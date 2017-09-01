@@ -11,59 +11,31 @@
 #ifndef IMAGESOURCE_IMAGESOURCE_H_
 #define IMAGESOURCE_IMAGESOURCE_H_
 
-#include <boost/asio/steady_timer.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/core/noncopyable.hpp>
-#include <boost/function/function_fwd.hpp>
-#include <boost/function.hpp>
-#include <boost/system/error_code.hpp>
-#include <cstdbool>
+#include <memory>
 #include <string>
 
 #include "Camera.h"
+#include "../Component.h"
 
-class FrameSequence;
-class SceneInterface;
+class Frame;
+class ScenePublisher;
 
 class GUI_Interface;
 
-class ImageSource : private boost::noncopyable {
+class ImageSource : public Component {
  public:
-  ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service,
-              FrameSequence& frameSequence, boost::function<void(const int)> next,
-              const int fps = 1);
+  explicit ImageSource(const std::string& url);
   virtual ~ImageSource();
-
-  Camera& get_camera();
-  const std::string& get_name() const;
-  void shutdown();
-  void toggle_pause();
-
-  void set_frames_per_second(const int fps);
+  void process_next_frame(std::shared_ptr<Frame>&);
 
  private:
   // Make sure we can't copy them
-//    Scene(const Scene&);
-//    Scene& operator=(Scene);
+  ImageSource(const ImageSource&);
+  ImageSource& operator=(ImageSource);
 
-  const std::string& name_;
-  int interval_;
   Camera camera_;
-
-  FrameSequence& frame_sequence_;
-
-  boost::function<void(const int)> next_;
-
-  boost::asio::steady_timer timer_;
-  boost::asio::strand strand_;
-
-  bool shutting_down_;
-  void get_next_frame(const boost::system::error_code& ec);
-
-  void restart_timer();
-  void start_timer();
-
-  bool is_paused_ = false;
+  const unsigned int width_;
+  const unsigned int height_;
 };
 
 #endif // IMAGESOURCE_IMAGESOURCE_H_

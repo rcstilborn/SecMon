@@ -17,7 +17,7 @@
 #include <iterator>
 #include <memory>
 
-Stream::Stream(SceneInterface::image_ready_signal& signal, int stream_id)
+Stream::Stream(ScenePublisher::image_ready_signal& signal, int stream_id)
     : signal_(signal),
       stream_id_(stream_id),
       connection_list_(),
@@ -78,7 +78,7 @@ void Stream::registerNewConnection(http::connection_ptr conn) {
   //    }
 }
 
-boost::signals2::connection Stream::connectToSignal(const SceneInterface::image_ready_signal::slot_type &subscriber) {
+boost::signals2::connection Stream::connectToSignal(const ScenePublisher::image_ready_signal::slot_type &subscriber) {
   return signal_.connect(subscriber);
 }
 

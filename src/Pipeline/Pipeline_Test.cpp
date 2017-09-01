@@ -12,23 +12,26 @@
 #include <gtest/gtest.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/bind/placeholders.hpp>
 #include <memory>
 
-void pipeline_test_function(const int i) {
-  if (i < 0)
-    return;
+struct foo {
+};
+void pipeline_test_function(std::shared_ptr<foo> i) {
+if (i < 0)
+  return;
 }
 
 TEST(PipelineConstructor, Success) {
   boost::asio::io_service io_service;
-  pipeline::Pipeline p(io_service);
+  pipeline::Pipeline<foo> p(io_service);
 }
 
 TEST(PipelineAddTimedElement, Success) {
   boost::asio::io_service io_service;
-  pipeline::Pipeline p(io_service);
+  pipeline::Pipeline<foo> p(io_service);
   try {
-    p.add(pipeline::TimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1)));
+    p.addTimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, boost::placeholders::_1));
   } catch (const char* msg) {
     FAIL()<< msg;
   }
@@ -36,18 +39,18 @@ TEST(PipelineAddTimedElement, Success) {
 
 TEST(PipelineAddTimedElement, NotFirstElement) {
   boost::asio::io_service io_service;
-  pipeline::Pipeline p(io_service);
-  p.add(pipeline::TimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1)));
-  ASSERT_ANY_THROW(p.add(pipeline::TimedElement
-          (pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1))))<< "Did not throw!";
+  pipeline::Pipeline<foo> p(io_service);
+  p.addTimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, boost::placeholders::_1));
+  ASSERT_ANY_THROW(p.addTimedElement(pipeline::TimerType::Interval, 10,
+                                     boost::bind(pipeline_test_function, boost::placeholders::_1)))<< "Did not throw!";
 }
 
 TEST(PipelineAddElement, Success) {
   boost::asio::io_service io_service;
-  pipeline::Pipeline p(io_service);
-  p.add(pipeline::TimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1)));
+  pipeline::Pipeline<foo> p(io_service);
+  p.addTimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, boost::placeholders::_1));
   try {
-    p.add(pipeline::Element(boost::bind(pipeline_test_function, 1)));
+    p.addElement(boost::bind(pipeline_test_function, boost::placeholders::_1));
   } catch (const char* msg) {
     FAIL()<< msg;
   }
@@ -55,15 +58,15 @@ TEST(PipelineAddElement, Success) {
 
 TEST(PipelineAddElement, FirstElement) {
   boost::asio::io_service io_service;
-  pipeline::Pipeline p(io_service);
-  ASSERT_ANY_THROW(p.add(pipeline::Element(boost::bind(pipeline_test_function, 1))))<< "Did not throw!";
+  pipeline::Pipeline<foo> p(io_service);
+  ASSERT_ANY_THROW(p.addElement(boost::bind(pipeline_test_function, boost::placeholders::_1)))<< "Did not throw!";
 }
 
 TEST(PipelineCompile, SuccessOneElement) {
   try {
     boost::asio::io_service io_service;
-    pipeline::Pipeline p(io_service);
-    p.add(pipeline::TimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1)));
+    pipeline::Pipeline<foo> p(io_service);
+    p.addTimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, boost::placeholders::_1));
     p.compile();
   } catch (const char* msg) {
     FAIL()<< msg;
@@ -73,9 +76,9 @@ TEST(PipelineCompile, SuccessOneElement) {
 TEST(PipelineCompile, SuccessTwoElements) {
   try {
     boost::asio::io_service io_service;
-    pipeline::Pipeline p(io_service);
-    p.add(pipeline::TimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1)));
-    p.add(pipeline::Element(boost::bind(pipeline_test_function, 1)));
+    pipeline::Pipeline<foo> p(io_service);
+    p.addTimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, boost::placeholders::_1));
+    p.addElement(boost::bind(pipeline_test_function, boost::placeholders::_1));
     p.compile();
   } catch (const char* msg) {
     FAIL()<< msg;
@@ -85,10 +88,10 @@ TEST(PipelineCompile, SuccessTwoElements) {
 TEST(PipelineCompile, SuccessThreeElements) {
   try {
     boost::asio::io_service io_service;
-    pipeline::Pipeline p(io_service);
-    p.add(pipeline::TimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, 1)));
-    p.add(pipeline::Element(boost::bind(pipeline_test_function, 1)));
-    p.add(pipeline::Element(boost::bind(pipeline_test_function, 1)));
+    pipeline::Pipeline<foo> p(io_service);
+    p.addTimedElement(pipeline::TimerType::Interval, 10, boost::bind(pipeline_test_function, boost::placeholders::_1));
+    p.addElement(boost::bind(pipeline_test_function, boost::placeholders::_1));
+    p.addElement(boost::bind(pipeline_test_function, boost::placeholders::_1));
     p.compile();
   } catch (const char* msg) {
     FAIL()<< msg;

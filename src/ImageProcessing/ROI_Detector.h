@@ -23,7 +23,7 @@ class ROI_Detector {
   ROI_Detector();
   virtual ~ROI_Detector();
 
-  void processFrame(std::shared_ptr<Frame> frame0);
+  void processFrame(std::shared_ptr<Frame>& frame);
 
 //private:
   static bool is_too_small_(std::vector<cv::Point> contour);
