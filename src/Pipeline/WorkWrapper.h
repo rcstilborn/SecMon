@@ -21,20 +21,28 @@
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <memory>
+#include <queue>
+#include <utility>
+#include <chrono>
 #include <stdexcept>
 #include <iostream>
+#include <iomanip>
+#include <ctime>
 
 namespace pipeline {
 
-//class PipelineData;
+using TimeStatsQueue = std::queue<std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>,
+                                            std::chrono::time_point<std::chrono::high_resolution_clock>>>;
+
 template <class T>
 class WorkWrapper {
  public:
   WorkWrapper() = delete;
-  explicit WorkWrapper(boost::asio::io_service& io_service, boost::function<void(std::shared_ptr<T>&)> work);
+  explicit WorkWrapper(boost::asio::io_service& io_service,
+                       boost::function<void(std::shared_ptr<T>&)> work,
+                       std::shared_ptr<TimeStatsQueue> time_stats_queue);
   virtual ~WorkWrapper();
   virtual void schedule_work(std::shared_ptr<T>&);
-  virtual void pause() {}
 
   void set_next(boost::function<void(std::shared_ptr<T>&)> next) {next_ = next;}
   boost::function<void(std::shared_ptr<T>&)> get_schedule_work() {
@@ -45,12 +53,14 @@ class WorkWrapper {
   boost::function<void(std::shared_ptr<T>&)> work_;  // This is the work that gets done
   boost::function<void(std::shared_ptr<T>&)> next_;  // This points to schedule_work of next element
   virtual void do_work(std::shared_ptr<T>&);         // This calls work_ then next_
+  std::shared_ptr<TimeStatsQueue> time_stats_queue_;
 };
 
 template <class T>
 WorkWrapper<T>::WorkWrapper(boost::asio::io_service& io_service,
-                         boost::function<void(std::shared_ptr<T>&)> work)
-: strand_(io_service), work_(work), next_() {
+                            boost::function<void(std::shared_ptr<T>&)> work,
+                            std::shared_ptr<TimeStatsQueue> time_stats_queue)
+: strand_(io_service), work_(work), next_(), time_stats_queue_(time_stats_queue) {
 }
 
 template <class T>
@@ -59,19 +69,25 @@ WorkWrapper<T>::~WorkWrapper() {
 
 template <class T>
 void WorkWrapper<T>::schedule_work(std::shared_ptr<T>& data) {
-//  std::cout << "WorkWrapper schedule_work" << std::endl;
+  // Record Time
   strand_.post(boost::bind(&WorkWrapper<T>::do_work, this, data));
 }
 
 template <class T>
 void WorkWrapper<T>::do_work(std::shared_ptr<T>& data) {
-//  std::cout << "WorkWrapper do_work" << std::endl;
+  // Record time
+  auto start_time = std::chrono::high_resolution_clock::now();
 
-  // Record Time
+  // Do the work
   work_(data);
-  // Record Time
+
+  // Report Times
+  auto end_time = std::chrono::high_resolution_clock::now();
+//  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << std::endl;
+  time_stats_queue_->emplace(start_time, end_time);
+
+  // Schedule the next element in the pipeline
   if (!next_.empty()) {
-//    std::cout << "WorkWrapper schedule next work" << std::endl;
     next_(data);
   }
 }

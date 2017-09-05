@@ -28,14 +28,15 @@
 
 Scene::Scene(const std::string& name, const std::string& url,
              boost::asio::io_service& io_service, GUI_Interface& gui,
-             const int fps)
+             const double realtime_factor)
     : name_(name),
       components_(),
       pipeline_(io_service) {
 
   // Construct the image source and add it to the pipeline
   std::shared_ptr<ImageSource> is_ptr(new ImageSource(url));
-  pipeline_.addTimedElement(pipeline::TimerType::Interval, 1000/fps,
+  source_fps_ = is_ptr->get_frames_per_second();
+  pipeline_.addTimedElement(pipeline::TimerType::Interval, 1000/(source_fps_*realtime_factor),
                             boost::bind(&ImageSource::process_next_frame, is_ptr, boost::placeholders::_1));
   components_.push_back(is_ptr);
 
@@ -56,7 +57,8 @@ Scene::Scene(const std::string& name, const std::string& url,
 //      new OOI_Processor ooi_processor(scene_interface_, frame_sequence_));
 //  components_.push_back(std::unique_ptr<WorkWrapper>(
 //      new ImageProcessor image_processor_(scene_interface_, frame_sequence_));
-    DLOG(INFO)<< "Scene(" << name << ", " << url << ", " << fps << "fps) - constructed";
+    DLOG(INFO)<< "Scene(" << name << ", " << url << ", " << source_fps_ << "fps, * "
+              << realtime_factor << " factor) - constructed";
   }
 
   Scene::~Scene() {
@@ -72,15 +74,15 @@ void Scene::shutdown() {
 }
 
 void Scene::toggle_pause() {
-  isPaused_ = !isPaused_;
-  pipeline_.pause();
-  if (isPaused_)
-  std::cout << "Pausing..." << std::endl;
+  if (!isPaused_)
+    DLOG(INFO) << "Pausing...";
   else
-  std::cout << "Resuming..." << std::endl;
+    DLOG(INFO) << "Resuming...";
+  pipeline_.pause();
+  isPaused_ = !isPaused_;
 }
 
-void Scene::set_frames_per_second(const int fps) {
-  pipeline_.change_timer(1000/fps);
-  DLOG(INFO)<< "Setting FPS to " << fps;
+void Scene::set_realtime_factor(const double realtime_factor) {
+  pipeline_.change_timer(1000/(source_fps_*realtime_factor));
+  DLOG(INFO)<< "Setting realtime_factor to " << realtime_factor;
 }

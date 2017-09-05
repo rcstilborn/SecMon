@@ -30,13 +30,13 @@ class SceneMonitor : private boost::noncopyable {
  public:
   SceneMonitor(boost::asio::io_service& io_service, GUI_Interface& gui);
   virtual ~SceneMonitor();
-  void start_monitoring(const std::string& name, const std::string& url);
+  void start_monitoring(const std::string& name, const std::string& url, const double realtime_factor);
   void stop_monitoring(const std::string&);
   void stop_all_monitoring();
   const std::string get_scene_names() const;
   //    std::vector<scene_details> getSceneDetails();
   void toggle_pause();
-  void set_frames_per_second(const int fps);
+  void set_realtime_factor(const double realtime_factor);
 
  private:
   boost::asio::io_service& io_service_;

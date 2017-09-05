@@ -41,7 +41,7 @@ SceneMonitor::~SceneMonitor() {
     scenes_.erase(it);
 }
 
-void SceneMonitor::start_monitoring(const std::string& name, const std::string& url) {
+void SceneMonitor::start_monitoring(const std::string& name, const std::string& url, const double realtime_factor) {
   // Check if we already have this name
   boost::ptr_map<std::string, Scene>::iterator it = scenes_.find(name);
   if (it != this->scenes_.end())
@@ -49,7 +49,7 @@ void SceneMonitor::start_monitoring(const std::string& name, const std::string& 
 
   // Create the scene
   {
-    Scene* scene = new Scene(name, url, io_service_, gui_, 5);
+    Scene* scene = new Scene(name, url, io_service_, gui_, realtime_factor);
     boost::lock_guard<boost::mutex> guard(scenes_mtx_);
     // TODO(richard): Fix this silliness!
     std::string foo(name);
@@ -107,7 +107,7 @@ void SceneMonitor::toggle_pause() {
     scene.second->toggle_pause();
 }
 
-void SceneMonitor::set_frames_per_second(const int fps) {
+void SceneMonitor::set_realtime_factor(const double realtime_factor) {
   for (auto scene : this->scenes_)
-    scene.second->set_frames_per_second(fps);
+    scene.second->set_realtime_factor(realtime_factor);
 }

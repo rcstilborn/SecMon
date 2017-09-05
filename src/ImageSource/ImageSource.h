@@ -27,6 +27,7 @@ class ImageSource : public Component {
   explicit ImageSource(const std::string& url);
   virtual ~ImageSource();
   void process_next_frame(std::shared_ptr<Frame>&);
+  int get_frames_per_second() const { return camera_.get_frames_per_second(); }
 
  private:
   // Make sure we can't copy them

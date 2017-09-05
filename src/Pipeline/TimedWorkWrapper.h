@@ -20,9 +20,15 @@
 #include <memory>
 #include <chrono>
 #include <iostream>
+#include <vector>
+#include <queue>
+#include <utility>
 #include "WorkWrapper.h"
 
 namespace pipeline {
+
+using TimeStatsQueue = std::queue<std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>,
+                                            std::chrono::time_point<std::chrono::high_resolution_clock>>>;
 
 template <class T>
 class TimedWorkWrapper : public WorkWrapper<T> {
@@ -30,11 +36,13 @@ class TimedWorkWrapper : public WorkWrapper<T> {
   TimedWorkWrapper() = delete;
   explicit TimedWorkWrapper(boost::asio::io_service& io_service,
                             boost::function<void(std::shared_ptr<T>&)> work,
-                            const unsigned int milliseconds);
+                            const unsigned int milliseconds,
+                            std::shared_ptr<TimeStatsQueue> time_stats_queue);
   ~TimedWorkWrapper();
 
   void schedule_work(std::shared_ptr<T>& data);
   void pause();
+  void set_interval(const int milliseconds) { milliseconds_ = milliseconds; }
 
  private:
   unsigned int milliseconds_;
@@ -47,12 +55,12 @@ class TimedWorkWrapper : public WorkWrapper<T> {
 
 template <class T>
 TimedWorkWrapper<T>::TimedWorkWrapper(boost::asio::io_service& io_service,
-                                   boost::function<void(std::shared_ptr<T>&)> work,
-                                   const unsigned int milliseconds)
-  : WorkWrapper<T>::WorkWrapper(io_service, work),
+                                      boost::function<void(std::shared_ptr<T>&)> work,
+                                      const unsigned int milliseconds,
+                                      std::shared_ptr<TimeStatsQueue> time_stats_queue)
+  : WorkWrapper<T>::WorkWrapper(io_service, work, time_stats_queue),
     milliseconds_(milliseconds),
     timer_(io_service) {
-  std::cout << "TimedWorkWrapper constructed" << std::endl;
 }
 
 template <class T>
@@ -62,21 +70,21 @@ TimedWorkWrapper<T>::~TimedWorkWrapper() {
 template <class T>
 void TimedWorkWrapper<T>::schedule_work(std::shared_ptr<T>& /*data*/) {
   start_timer();
-//  std::cout << "TimedWorkWrapper schedule_work" << std::endl;
 }
 
 template <class T>
 void TimedWorkWrapper<T>::do_work(const boost::system::error_code& ec) {
   // Check for some kind of error
-  if (ec) throw ec.message();
-
-//  std::cout << "TimedWorkWrapper do_work" << std::endl;
+  if (ec) {
+    if (ec == boost::asio::error::operation_aborted)
+      return;
+    else
+      throw ec.message();
+  }
 
   // Create some dummy data
   std::shared_ptr<T> data;
   WorkWrapper<T>::do_work(data);
-
-//  std::cout << "TimedWorkWrapper work done" << std::endl;
 
   // Set the timer again
   restart_timer();

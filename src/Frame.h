@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include <chrono>
 
 // TODO(richard): refactor away

@@ -65,10 +65,19 @@ PerformanceMetrics::PerformanceMetrics(boost::asio::io_service& io_service, cons
   fclose(file);
   std::cout << "Performance Metrics - constructed.  Interval=" << this->interval_ << "s, # processors="
             << this->number_of_processors_ << "Total memory available=" << totalPhysMem << std::endl;
-  std::cout << std::chrono::high_resolution_clock::period::den << " ticks per second" << std::endl;
   DLOG(INFO) << "Performance Metrics - constructed.  Interval=" << this->interval_
              << "s, # processors=" << this->number_of_processors_
              << "Total memory available=" << totalPhysMem;
+
+  std::chrono::duration<double, std::nano> ns1 = typename std::chrono::high_resolution_clock::duration(1);
+  std::cout << "Resolution of high_resolution_clock: " << ns1.count() << " ns\n";
+
+  std::chrono::duration<double, std::nano> ns2 = typename std::chrono::system_clock::duration(1);
+  std::cout << "Resolution of system_clock: " << ns2.count() << " ns\n";
+
+  DLOG(INFO)<< "Resolution of high_resolution_clock: " << ns1.count() << " ns\n";
+  DLOG(INFO)<< "Resolution of system_clock: " << ns2.count() << " ns\n";
+
   std::cout.precision(4);
 }
 

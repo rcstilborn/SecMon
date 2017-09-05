@@ -44,6 +44,17 @@ static bool ValidateCamera(const char* flagname, const std::string& value) {
 DEFINE_validator(camera1, &ValidateCamera);
 #endif // DEBUG
 
+DEFINE_double(realtime_factor, 1.0, "Factor of real-time to operate at.  1.0 means realtime, 0.5 means half speed");
+// This is needed because of compiler warning for release builds
+#ifdef DEBUG
+static bool ValidateRealtimeFactor(const char* flagname, const double value) {
+  if (0.0 < value && value <= 1.0) return true;  // value is ok
+  std::cout << "Invalid value for --" << flagname << ": " << value << std::endl;
+  return false;
+}
+DEFINE_validator(realtime_factor, &ValidateRealtimeFactor);
+#endif // DEBUG
+
 /*
 
  HD Video Sources
@@ -69,7 +80,7 @@ DEFINE_validator(camera1, &ValidateCamera);
 
  */
 
-const int num_threads_in_pool = 4;
+const int kNumThreadsInPool = 4;
 
 //void doMenu();
 char getch();
@@ -112,10 +123,10 @@ int main(int argc, char * argv[]) {
     SceneMonitor sceneMonitor(io_service, gui);
 
     // Create the first scene
-    sceneMonitor.start_monitoring("Camera 1", FLAGS_camera1);
+    sceneMonitor.start_monitoring("Camera 1", FLAGS_camera1, FLAGS_realtime_factor);
 
     // Start the threadpool
-    for (int i = 0; i < num_threads_in_pool; i++)
+    for (int i = 0; i < kNumThreadsInPool; i++)
       threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
 
     gui.start();
@@ -128,11 +139,11 @@ int main(int argc, char * argv[]) {
       if (ch == 112)  // p - pause
         sceneMonitor.toggle_pause();
       else if (ch == 115)  // s - slow
-        sceneMonitor.set_frames_per_second(1);
+        sceneMonitor.set_realtime_factor(0.1);
       else if (ch == 110)  // n - normal
-        sceneMonitor.set_frames_per_second(10);
+        sceneMonitor.set_realtime_factor(0.5);
       else if (ch == 102)  // f - fast
-        sceneMonitor.set_frames_per_second(33);
+        sceneMonitor.set_realtime_factor(1.0);
       else if (ch == 10)
         break;
     }

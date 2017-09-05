@@ -21,8 +21,9 @@ void test_function(const int i) {
 
 TEST(WorkWrapperConstruct, Success) {
   boost::asio::io_service io_service;
+  std::shared_ptr<pipeline::TimeStatsQueue> tsq(new pipeline::TimeStatsQueue());
   try {
-    pipeline::WorkWrapper<const int> ww(io_service, boost::bind(test_function, 1));
+    pipeline::WorkWrapper<const int> ww(io_service, boost::bind(test_function, 1), tsq);
   } catch (const char* msg) {
     FAIL()<< msg;
   }

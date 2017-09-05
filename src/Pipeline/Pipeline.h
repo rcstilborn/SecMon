@@ -39,8 +39,11 @@
 #include <boost/function.hpp>
 #include <memory>
 #include <vector>
+#include <queue>
+#include <chrono>
 #include <exception>
 #include <iostream>
+#include <string>
 #include <utility>
 #include "TimedWorkWrapper.h"
 #include "WorkWrapper.h"
@@ -48,6 +51,8 @@
 namespace pipeline {
 
 enum TimerType { Interval, Delay };
+using TimeStatsQueue = std::queue<std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>,
+                                            std::chrono::time_point<std::chrono::high_resolution_clock>>>;
 
 template <class T>
 class Pipeline {
@@ -67,13 +72,19 @@ class Pipeline {
   bool is_compiled() const { return compiled_; }
   bool is_paused() const { return paused_; }
   bool is_started() const { return started_; }
+  void start_stats_timer();
+  void collect_stats(const boost::system::error_code& ec);
 
  private:
   boost::asio::io_service& io_service_;
+  boost::asio::strand strand_;
+  boost::asio::steady_timer timer_;
   bool paused_ = false;
   bool started_ = false;
   bool compiled_ = false;
   std::vector<std::unique_ptr<WorkWrapper<T>>> elements_;
+  std::vector<std::shared_ptr<TimeStatsQueue>> time_stats_;
+  std::chrono::time_point<std::chrono::high_resolution_clock> last_stats_time_;
 
   // Make sure we can't copy them
   Pipeline(const Pipeline&) = delete;
@@ -83,7 +94,11 @@ class Pipeline {
 template <class T>
 Pipeline<T>::Pipeline(boost::asio::io_service& io_service)
   : io_service_(io_service),
-    elements_() {
+    strand_(io_service),
+    timer_(io_service),
+    elements_(),
+    time_stats_(),
+    last_stats_time_() {
 }
 
 template <class T>
@@ -95,14 +110,16 @@ void Pipeline<T>::addTimedElement(TimerType /*timer_type*/,
                                   const int interval, boost::function<void(std::shared_ptr<T>&)> work) {
   if (compiled_) throw "Can't add elements once the pipeline has been compiled";
   if (!elements_.empty()) throw "Can only add TimedElement to an empty pipeline";
-  elements_.emplace_back(new TimedWorkWrapper<T>(io_service_, work, interval));
+  time_stats_.emplace_back(new TimeStatsQueue());
+  elements_.emplace_back(new TimedWorkWrapper<T>(io_service_, work, interval, time_stats_.back()));
 }
 
 template <class T>
 void Pipeline<T>::addElement(boost::function<void(std::shared_ptr<T>&)> work) {
   if (compiled_) throw "Can't add elements once the pipeline has been compiled";
   if (elements_.empty()) throw "Can only add regular Elements after a TimedElement or BlockingElement has been added";
-  elements_.emplace_back(new WorkWrapper<T>(io_service_, work));
+  time_stats_.emplace_back(new TimeStatsQueue());
+  elements_.emplace_back(new WorkWrapper<T>(io_service_, work, time_stats_.back()));
 }
 
 template <class T>
@@ -111,10 +128,7 @@ void Pipeline<T>::compile() {
     auto it_n_minus_1 = elements_.begin();
     auto it_n = elements_.begin();
     ++it_n;
-//    std::cout << "Size now: " << elements_.size() << std::endl;
     while (it_n != elements_.end()) {
-//      std::cout << "it_n_minus_1: " << it_n_minus_1 - elements_.begin()
-//                << ". it_n: " << it_n - elements_.begin() << std::endl;
       (*it_n_minus_1)->set_next((*it_n)->get_schedule_work());
       ++it_n_minus_1;
       ++it_n;
@@ -127,7 +141,7 @@ template <class T>
 void Pipeline<T>::pause() {
   if (!compiled_) throw "Can't perform pause operation before pipeline is compiled";
   if (!started_) throw "Can't perform pause operation before pipeline is started";
-  elements_.front()->pause();
+  (static_cast<TimedWorkWrapper<T>*>(elements_.front().get()))->pause();
   if (paused_)
     paused_ = false;
   else
@@ -140,13 +154,64 @@ void Pipeline<T>::start() {
   if (started_) throw "Pipeline has already been started!";
   auto dummy_data = std::shared_ptr<T>(nullptr);
   elements_.front()->schedule_work(dummy_data);
+  start_stats_timer();
   started_ = true;
+}
+
+template <class T>
+void Pipeline<T>::start_stats_timer() {
+  timer_.expires_from_now(std::chrono::milliseconds(1000));
+  timer_.async_wait(strand_.wrap(boost::bind(&Pipeline<T>::collect_stats, this, boost::placeholders::_1)));
+
+  last_stats_time_ = std::chrono::high_resolution_clock::now();
+}
+
+template <class T>
+void Pipeline<T>::collect_stats(const boost::system::error_code& ec) {
+  // Check for some kind of error
+  if (ec) {
+    if (ec == boost::asio::error::operation_aborted)
+      return;
+    else
+      throw ec.message();
+  }
+
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  // Collect the stats
+  std::chrono::time_point<std::chrono::high_resolution_clock> last_time = last_stats_time_;
+  last_stats_time_ = time_stats_.front()->front().first;
+  std::ostringstream ouput;
+  ouput << "Interval  Camera      ->      IP      ->  Publish";
+  for (unsigned int i = 0; i < time_stats_.back()->size(); i++) {
+    last_stats_time_ = time_stats_.front()->front().first;
+    ouput << '\n' << std::setw(8);
+    for (auto stats_queue : time_stats_) {
+      std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>,
+                      std::chrono::time_point<std::chrono::high_resolution_clock>> times = stats_queue->front();
+      stats_queue->pop();
+      ouput << std::setw(8) << std::chrono::duration_cast<
+          std::chrono::microseconds>(times.first - last_time).count();
+      ouput << std::setw(8) << std::chrono::duration_cast<
+          std::chrono::microseconds>(times.second - times.first).count();
+      last_time = times.second;
+    }
+  }
+
+  int dur = std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::high_resolution_clock::now() - start_time).count();
+  ouput << "    (" << dur << ")\n";
+  std::cout << ouput.str() << std::endl;
+  // Reschedule the timer
+  timer_.expires_at(timer_.expires_at() + std::chrono::milliseconds(1000));
+  timer_.async_wait(strand_.wrap(boost::bind(&Pipeline<T>::collect_stats, this, boost::placeholders::_1)));
 }
 
 template <class T>
 void Pipeline<T>::change_timer(const unsigned int milliseconds) {
   if (!compiled_) throw "Can't perform change_timer operation before pipeline is compiled";
-  std::cout << "Would be changing the timer to: " << milliseconds << std::endl;
+  (static_cast<TimedWorkWrapper<T>*>(elements_.front().get()))->set_interval(milliseconds);
+  std::cout << "changed the timer to: " << milliseconds << std::endl;
 }
 
 } // namespace pipeline
