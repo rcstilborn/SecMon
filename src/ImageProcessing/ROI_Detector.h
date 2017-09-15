@@ -15,15 +15,17 @@
 #include <cstdbool>
 #include <vector>
 #include <memory>
+#include "../Component.h"
 
-#include "../Frame.h"
+//#include "../Frame.h"
+class Frame;
 
-class ROI_Detector {
+class ROI_Detector : public Component {
  public:
   ROI_Detector();
   virtual ~ROI_Detector();
 
-  void processFrame(std::shared_ptr<Frame>& frame);
+  void process_next_frame(std::shared_ptr<Frame>& frame);
 
 //private:
   static bool is_too_small_(std::vector<cv::Point> contour);

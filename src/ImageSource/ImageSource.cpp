@@ -32,12 +32,12 @@ void ImageSource::process_next_frame(std::shared_ptr<Frame>& frame) {
   frame = std::shared_ptr<Frame>(new Frame(width_, height_));
 
   try {
-    if (!camera_.get_next_frame(frame->get_original_image(), frame->get_overlay_image())) {
+    if (!camera_.get_next_frame(frame)) {
       LOG(WARNING)<< "ImageSource::getNextFrame() - camera returned false so restarting";
       this->camera_.restart();
 
       // Try the camera again
-      if (!this->camera_.get_next_frame(frame->get_original_image(), frame->get_original_image())) {
+      if (!this->camera_.get_next_frame(frame)) {
         // If it fails again then abort - delete the last frame and throw
         LOG(WARNING) << "ImageSource::getNextFrame() - Camera failed to read after re-start.  Abort.";
         throw "Camera failed to read after re-start";

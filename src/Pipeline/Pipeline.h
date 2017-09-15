@@ -58,13 +58,15 @@ template <class T>
 class Pipeline {
  public:
   Pipeline() = delete;
-  explicit Pipeline(boost::asio::io_service& io_service);
+  explicit Pipeline(boost::asio::io_service& io_service, const unsigned int stats_interval = 5000);
   virtual ~Pipeline();
 
   void addTimedElement(TimerType, const int, boost::function<void(std::shared_ptr<T>&)>);
+  void addTimedElement(TimerType, const int, boost::function<void(std::shared_ptr<T>&)>, const std::string&);
   // TODO(Richard): Add blocking element type for webcam feeds
   // void addBlockingElement(boost::function<void(T)> work);
   void addElement(boost::function<void(std::shared_ptr<T>&)> work);
+  void addElement(boost::function<void(std::shared_ptr<T>&)> work, const std::string&);
   void change_timer(const unsigned int milliseconds);
   void compile();
   void pause();
@@ -83,22 +85,25 @@ class Pipeline {
   bool started_ = false;
   bool compiled_ = false;
   std::vector<std::unique_ptr<WorkWrapper<T>>> elements_;
+  const unsigned int stats_interval_;
   std::vector<std::shared_ptr<TimeStatsQueue>> time_stats_;
   std::chrono::time_point<std::chrono::high_resolution_clock> last_stats_time_;
-
+  std::string stats_output_header_;
   // Make sure we can't copy them
   Pipeline(const Pipeline&) = delete;
   Pipeline& operator=(Pipeline) = delete;
 };
 
 template <class T>
-Pipeline<T>::Pipeline(boost::asio::io_service& io_service)
+Pipeline<T>::Pipeline(boost::asio::io_service& io_service, const unsigned int stats_interval)
   : io_service_(io_service),
     strand_(io_service),
     timer_(io_service),
     elements_(),
+    stats_interval_(stats_interval),
     time_stats_(),
-    last_stats_time_() {
+    last_stats_time_(),
+    stats_output_header_("Interval") {
 }
 
 template <class T>
@@ -115,11 +120,31 @@ void Pipeline<T>::addTimedElement(TimerType /*timer_type*/,
 }
 
 template <class T>
+void Pipeline<T>::addTimedElement(TimerType timer_type,
+                                  const int interval, boost::function<void(std::shared_ptr<T>&)> work,
+                                  const std::string& stats_output_header) {
+  if (compiled_) throw "Can't add elements once the pipeline has been compiled";
+  if (!elements_.empty()) throw "Can only add TimedElement to an empty pipeline";
+  stats_output_header_.append(stats_output_header);
+  this->addTimedElement(timer_type, interval, work);
+}
+
+template <class T>
 void Pipeline<T>::addElement(boost::function<void(std::shared_ptr<T>&)> work) {
   if (compiled_) throw "Can't add elements once the pipeline has been compiled";
   if (elements_.empty()) throw "Can only add regular Elements after a TimedElement or BlockingElement has been added";
   time_stats_.emplace_back(new TimeStatsQueue());
   elements_.emplace_back(new WorkWrapper<T>(io_service_, work, time_stats_.back()));
+}
+
+template <class T>
+void Pipeline<T>::addElement(boost::function<void(std::shared_ptr<T>&)> work,
+                             const std::string& stats_output_header) {
+  if (compiled_) throw "Can't add elements once the pipeline has been compiled";
+  if (elements_.empty()) throw "Can only add regular Elements after a TimedElement or BlockingElement has been added";
+  stats_output_header_.append("      ->");
+  stats_output_header_.append(stats_output_header);
+  this->addElement(work);
 }
 
 template <class T>
@@ -160,7 +185,7 @@ void Pipeline<T>::start() {
 
 template <class T>
 void Pipeline<T>::start_stats_timer() {
-  timer_.expires_from_now(std::chrono::milliseconds(1000));
+  timer_.expires_from_now(std::chrono::milliseconds(stats_interval_));
   timer_.async_wait(strand_.wrap(boost::bind(&Pipeline<T>::collect_stats, this, boost::placeholders::_1)));
 
   last_stats_time_ = std::chrono::high_resolution_clock::now();
@@ -181,18 +206,19 @@ void Pipeline<T>::collect_stats(const boost::system::error_code& ec) {
   // Collect the stats
   std::chrono::time_point<std::chrono::high_resolution_clock> last_time = last_stats_time_;
   last_stats_time_ = time_stats_.front()->front().first;
-  std::ostringstream ouput;
-  ouput << "Interval  Camera      ->      IP      ->  Publish";
+  std::ostringstream output;
+//  ouput << "Interval  Camera      -> Movment      ->    ROIs      ->    HAAR      -> PerfMon      -> Publish";
+  output << stats_output_header_;
   for (unsigned int i = 0; i < time_stats_.back()->size(); i++) {
     last_stats_time_ = time_stats_.front()->front().first;
-    ouput << '\n' << std::setw(8);
+    output << '\n' << std::setw(8);
     for (auto stats_queue : time_stats_) {
       std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>,
                       std::chrono::time_point<std::chrono::high_resolution_clock>> times = stats_queue->front();
       stats_queue->pop();
-      ouput << std::setw(8) << std::chrono::duration_cast<
+      output << std::setw(8) << std::chrono::duration_cast<
           std::chrono::microseconds>(times.first - last_time).count();
-      ouput << std::setw(8) << std::chrono::duration_cast<
+      output << std::setw(8) << std::chrono::duration_cast<
           std::chrono::microseconds>(times.second - times.first).count();
       last_time = times.second;
     }
@@ -200,10 +226,10 @@ void Pipeline<T>::collect_stats(const boost::system::error_code& ec) {
 
   int dur = std::chrono::duration_cast<std::chrono::microseconds>(
       std::chrono::high_resolution_clock::now() - start_time).count();
-  ouput << "    (" << dur << ")\n";
-  std::cout << ouput.str() << std::endl;
+  output << "    (" << dur << ")\n";
+  std::cout << output.str() << std::endl;
   // Reschedule the timer
-  timer_.expires_at(timer_.expires_at() + std::chrono::milliseconds(1000));
+  timer_.expires_at(timer_.expires_at() + std::chrono::milliseconds(stats_interval_));
   timer_.async_wait(strand_.wrap(boost::bind(&Pipeline<T>::collect_stats, this, boost::placeholders::_1)));
 }
 

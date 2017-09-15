@@ -34,8 +34,7 @@ class Frame {
 //  Frame(const int frame_id, const int width, const int height);
   virtual ~Frame();
 
-  void set_start_time();
-//  int get_frame_id() const;
+//  void set_start_time();
 
   cv::Mat& get_original_image();
   cv::Mat& get_overlay_image();
@@ -49,9 +48,11 @@ class Frame {
   ScenePublisher::image_ptr get_original_with_overlay_image_as_jpg();
   const std::vector<cv::Rect>& getRoIs() const;
   std::vector<cv::Rect>& get_regions_of_interest();
-
+  void set_display_time(const std::string time) {display_time_ = time; }
+  void set_display_name(const std::string name) {display_name_ = name; }
+  void set_display_stats(const std::string stats) {display_stats_ = stats; }
+  //void set_record_indicator();
  private:
-//  const int frame_id_;
   // Make sure we can't copy them
   Frame(const Frame&) = delete;
   Frame& operator=(Frame) = delete;
@@ -62,8 +63,16 @@ class Frame {
 #endif  // CPU_ONLY
 
   std::string image_names_[kMaxImagesPerFrame];
-  std::chrono::system_clock::time_point start_time_;
+//  std::chrono::system_clock::time_point start_time_;
   std::vector<cv::Rect> regions_of_interest_;
+
+  const int border_height_;
+  const double text_size_;
+  const int text_from_top_;
+
+  std::string display_time_;
+  std::string display_name_;
+  std::string display_stats_;
 };
 
 #endif  // FRAME_H_

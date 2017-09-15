@@ -19,6 +19,7 @@
 #include <iterator>
 #include <vector>
 #include <memory>
+#include "../Frame.h"
 
 ROI_Detector::ROI_Detector() {
 }
@@ -100,7 +101,7 @@ void ROI_Detector::consolidate_rectangles(std::vector<cv::Rect>& rects) {
   }
 }
 
-void ROI_Detector::processFrame(std::shared_ptr<Frame>& current_frame) {
+void ROI_Detector::process_next_frame(std::shared_ptr<Frame>& current_frame) {
   try {
     cv::Mat& foreground = current_frame->get_image("foreground");
     cv::Mat& overlay_image = current_frame->get_overlay_image();
@@ -117,7 +118,8 @@ void ROI_Detector::processFrame(std::shared_ptr<Frame>& current_frame) {
     // Remove the small ones
     contours.erase(std::remove_if(contours.begin(), contours.end(), ROI_Detector::is_too_small_), contours.end());
 
-    cv::drawContours(overlay_image, contours, -1, cv::Scalar(0, 255, 0), 2);
+//    cv::drawContours(overlay_image, contours, -1, cv::Scalar(0, 255, 0), 2);
+
     // Build the list of rectangles
     std::vector<cv::Rect>& rects = current_frame->get_regions_of_interest();
     for (auto contour : contours)
@@ -130,10 +132,8 @@ void ROI_Detector::processFrame(std::shared_ptr<Frame>& current_frame) {
     // Start from the small end - only need to compare rectangles with >= ones.
     consolidate_rectangles(rects);
 
-  //    for(auto rect : rects) {
-  ////        std::cout << rect.area() << std::endl;
-  //        cv::rectangle(overlayImage, rect, cv::Scalar(0, 255, 0), 2);
-  //    }
+    for (auto rect : rects)
+          cv::rectangle(overlay_image, rect, cv::Scalar(0, 255, 0), 2);
   } catch (std::exception& e) {
     return;
   }

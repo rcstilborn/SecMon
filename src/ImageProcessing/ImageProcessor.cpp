@@ -14,7 +14,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
-
+#include "../Frame.h"
 #include "MovementDetectorBasic.h"
 
 ImageProcessor::ImageProcessor()
@@ -29,11 +29,11 @@ ImageProcessor::~ImageProcessor() {
 
 void ImageProcessor::process_next_frame(std::shared_ptr<Frame>& frame) {
 
-  frame->set_start_time();
+//  frame->set_start_time();
 
-  movement_detector_->process_frame(frame);
+  movement_detector_->process_next_frame(frame);
 //        bg1.subtractBackground(frame0);
   //    imbs.apply(frame0->getOriginalImage(),frame0->getNewImage("imbs"));
 
-  roi_.processFrame(frame);
+  roi_.process_next_frame(frame);
 }

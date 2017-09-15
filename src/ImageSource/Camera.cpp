@@ -26,6 +26,9 @@
 #include <string>
 #include <chrono>
 #include <ctime>
+#include <memory>
+
+#include "../Frame.h"
 
 Camera::Camera(const std::string& source)
     : source_(source),
@@ -60,32 +63,31 @@ Camera::Camera(const std::string& source)
   width_ = img.cols;  //(unsigned int) this->camera_.get(CV_CAP_PROP_FRAME_WIDTH);
   height_ = img.rows;//(unsigned int) this->camera_.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-  // Make text size proportional to the image height
-  text_size_ = img.rows / 650.0;
-  left_margin_ = text_size_ * 25;
-  top_margin_ = text_size_ * 35;
-
   DLOG(INFO) << "Connected to camera in " << dur <<
-                "ms. With size: [" << this->height_ << "x" << this->width_ << "]  FPS: " << this->fps_;
+                "ms. With size: [" << width_ << "x" << height_ << "]  FPS: " << this->fps_;
 }
 
 Camera::~Camera() {
 }
 
-bool Camera::get_next_frame(cv::Mat& img, cv::Mat& overlay) {
+bool Camera::get_next_frame(std::shared_ptr<Frame>& frame) {
+  cv::Mat& img = frame->get_original_image();
+
   if (camera_.read(img)) {
     if (real_camera_) {
       //Couldn't get this to work!
       //std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
       //std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
       //const std::string now = std::put_time(std::localtime(&now_c), "%c");
-      const std::string now = boost::posix_time::to_simple_string(boost::posix_time::second_clock::local_time());
-
-      cv::putText(overlay, now, cvPoint(40, 25), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(255, 255, 255), 2);
+//      const std::string now = boost::posix_time::to_simple_string(boost::posix_time::second_clock::local_time());
+//      frame.set_display_time(now);
+      frame->set_display_time(boost::posix_time::to_simple_string(boost::posix_time::second_clock::local_time()));
+//      cv::putText(overlay, now, cvPoint(40, 25), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(255, 255, 255), 2);
     } else {
-      std::string frame_number = std::to_string((unsigned int) this->camera_.get(CV_CAP_PROP_POS_FRAMES));
-      cv::putText(overlay, frame_number, cvPoint(left_margin_, top_margin_), cv::FONT_HERSHEY_SIMPLEX, text_size_,
-                  cv::Scalar(255, 255, 255), 2);
+      frame->set_display_time(std::to_string((unsigned int) this->camera_.get(CV_CAP_PROP_POS_FRAMES)));
+//      std::string frame_number = std::to_string((unsigned int) this->camera_.get(CV_CAP_PROP_POS_FRAMES));
+//      cv::putText(overlay, frame_number, cvPoint(left_margin_, top_margin_), cv::FONT_HERSHEY_SIMPLEX, text_size_,
+//                  cv::Scalar(255, 255, 255), 2);
     }
     return true;
   }

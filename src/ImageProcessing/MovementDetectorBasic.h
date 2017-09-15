@@ -15,13 +15,14 @@
 #include <memory>
 
 #include "MovementDetector.h"
+class Frame;
 
 class MovementDetectorBasic : public MovementDetector {
  public:
   MovementDetectorBasic();
   virtual ~MovementDetectorBasic();
 
-  void process_frame(std::shared_ptr<Frame>& frame);
+  void process_next_frame(std::shared_ptr<Frame>& frame);
 
  private:
   void search_for_movement(cv::Mat thresholdImage, cv::Mat &cameraFeed);

@@ -9,6 +9,7 @@
  */
 
 #include "MovementDetectorBasic.h"
+#include <opencv2/opencv.hpp>
 #include <vector>
 #include <memory>
 
@@ -20,7 +21,7 @@ static const int kSensitivityValue = 20;
 static const int kBlurSize = 10;
 
 // TODO(richard): Make this configurable
-static const int kDifferenceInterval = 5;
+static const int kDifferenceInterval = 1;
 
 
 MovementDetectorBasic::MovementDetectorBasic()
@@ -30,7 +31,7 @@ MovementDetectorBasic::MovementDetectorBasic()
 MovementDetectorBasic::~MovementDetectorBasic() {
 }
 
-void MovementDetectorBasic::process_frame(std::shared_ptr<Frame>& current_frame) {
+void MovementDetectorBasic::process_next_frame(std::shared_ptr<Frame>& current_frame) {
   frames_since_last_diff_++;
 
   // Test for a previous frame.
@@ -55,7 +56,7 @@ void MovementDetectorBasic::process_frame(std::shared_ptr<Frame>& current_frame)
   cv::cvtColor(previous_frame_->get_original_image(), gray_image_previous, cv::COLOR_BGR2GRAY);
 
   //resulting difference image
-  cv::Mat& difference_image = current_frame->get_new_image("difference");
+  cv::Mat difference_image; // = current_frame->get_new_image("difference");
   //thresholded difference image (for use in findContours() function)
   cv::Mat& foreground_image = current_frame->get_new_image("foreground");
 

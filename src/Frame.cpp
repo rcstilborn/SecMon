@@ -15,6 +15,7 @@
 #include <opencv2/core/mat.inl.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -22,10 +23,15 @@
 #include <chrono>
 
 Frame::Frame(const int width, const int height)
-    : //frame_id_(frame_id),
-      frame_size_(width, height),
-      start_time_(),
-      regions_of_interest_() {
+    : frame_size_(width, height),
+//      start_time_(),
+      regions_of_interest_(),
+      border_height_(height * 0.04),
+      text_size_(height/1000.0),
+      text_from_top_(border_height_ - 12),
+      display_time_(),
+      display_name_(),
+      display_stats_() {
   image_names_[0] = "original";
   image_names_[1] = "overlay";
   images_[1] = cv::Mat::zeros(frame_size_, CV_8UC3);
@@ -119,21 +125,35 @@ ScenePublisher::image_ptr Frame::get_original_with_overlay_image_as_jpg() {
   if (images_[0].empty())
     throw std::invalid_argument("No data in original image");
 
-  cv::Mat new_image;
-  images_[0].copyTo(new_image);
-  images_[1].copyTo(new_image, images_[1]);
+  cv::Mat display_image;
+  cv::copyMakeBorder(images_[0], display_image, border_height_, 0, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+//  images_[0].copyTo(display_image);
+
+  images_[1].copyTo(display_image(cv::Rect(0, border_height_, frame_size_.width, frame_size_.height)), images_[1]);
+
+  if (!display_time_.empty()) {
+    cv::putText(display_image, display_time_, cv::Point(40, border_height_ - 15),
+                cv::FONT_HERSHEY_SIMPLEX, text_size_, cv::Scalar(255, 255, 255), 2);
+  }
+
+  if (!display_name_.empty()) {
+    int baseline;
+    cv::Size text_size = cv::getTextSize(display_name_, cv::FONT_HERSHEY_SIMPLEX, text_size_, 2, &baseline);
+    cv::putText(display_image, display_name_, cv::Point(frame_size_.width/2 - text_size.width/2, border_height_ - 15),
+                cv::FONT_HERSHEY_SIMPLEX, text_size_, cv::Scalar(255, 255, 255), 2);
+  }
+
+  if (!display_stats_.empty()) {
+    int baseline;
+    cv::Size text_size = cv::getTextSize(display_stats_, cv::FONT_HERSHEY_SIMPLEX, text_size_, 2, &baseline);
+    cv::putText(display_image, display_stats_, cv::Point(frame_size_.width - text_size.width - 40, border_height_ - 15),
+                cv::FONT_HERSHEY_SIMPLEX, text_size_, cv::Scalar(255, 255, 255), 2);
+  }
+
   ScenePublisher::image_ptr buffer(new std::vector<unsigned char>());
-  cv::imencode(".jpg", new_image, *buffer);
+  cv::imencode(".jpg", display_image, *buffer);
   return buffer;
 }
-
-void Frame::set_start_time() {
-  this->start_time_ = std::chrono::high_resolution_clock::now();
-}
-
-//int Frame::get_frame_id() const {
-//  return frame_id_;
-//}
 
 const std::vector<cv::Rect>& Frame::getRoIs() const {
   return regions_of_interest_;

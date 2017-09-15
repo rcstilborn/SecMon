@@ -13,13 +13,13 @@
 #define IMAGEPROCESSING_MOVEMENTDETECTOR_H_
 
 #include <memory>
-#include "../Frame.h"
+#include "../Component.h"
 
 class Frame;
 
-class MovementDetector {
+class MovementDetector : public Component {
  public:
-  virtual void process_frame(std::shared_ptr<Frame>& frame) = 0;
+  virtual void process_next_frame(std::shared_ptr<Frame>& frame) = 0;
   virtual ~MovementDetector();
 };
 

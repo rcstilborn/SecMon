@@ -16,14 +16,14 @@ EXE  = SecMon
 #
 CXX	 = g++
 # std::enable_shared_for_this requires -Wno-non-virtual-dtor
-CXXFLAGS = -Wall -Werror -Wextra -std=c++14 -Weffc++ -Wno-non-virtual-dtor
+CXXFLAGS = -Wall -Werror -Wextra -std=c++14 -Weffc++ -Wno-non-virtual-dtor -fmessage-length=0
 %.o : %.cpp
 
 #
 # Linker flags
 #
 LINKER_FLAGS = -L/usr/local/lib/ -lpthread
-LINKER_FLAGS += -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_core -lopencv_imgproc
+LINKER_FLAGS += -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_core -lopencv_imgproc -lopencv_objdetect
 LINKER_FLAGS += -lboost_system -lboost_date_time -lboost_thread
 LINKER_FLAGS += -lgflags -lglog -lopenblas
 #LINKER_FLAGS += -lcaffe -lglog -lgflags -lprotobuf -lm -lhdf5_hl -lhdf5 -lopenblas
@@ -38,7 +38,7 @@ DBGDIR = debug
 DBGDEPDIR = .depend/$(DBGDIR)
 DBGEXE = $(DBGDIR)/$(EXE)
 DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
-DBGCXXFLAGS = -pthread -DDEBUG -O0 -g3 -c -fmessage-length=0 -march=native -mmmx -msse -msse2 -msse3 -msse4.1 -mmovbe -mfpmath=sse
+DBGCXXFLAGS = -pthread -DDEBUG -O0 -g3 -c -march=native -mtune=native
 
 #
 # Unit test build settings
@@ -59,7 +59,7 @@ RELDEPDIR = .depend/$(RELDIR)
 RELEXE = $(RELDIR)/$(EXE)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 #RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mtune=native -mmmx -msse -msse2 -msse3 -msse4.1 -mmovbe -mfpmath=sse -ffast-math -fomit-frame-pointer -ffunction-sections
-RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mtune=native -ffast-math -fomit-frame-pointer -ffunction-sections
+RELCXXFLAGS = -pthread -DNDEBUG -Ofast -c -march=native -mtune=native
 .PHONY: all clean debug prep release remake test
 
 .SECONDARY:
