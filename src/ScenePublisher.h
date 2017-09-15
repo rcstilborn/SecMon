@@ -19,6 +19,7 @@
 #include <vector>
 #include <memory>
 #include "Component.h"
+#include "PerformanceMonitor.h"
 
 class Frame;
 class GUI_Interface;
@@ -52,6 +53,7 @@ class ScenePublisher : private boost::noncopyable, public Component{
   GUI_Interface& gui_;
   boost::mutex streams_list_mtx_;
   std::vector<std::shared_ptr<Stream>> streams_;
+  PerformanceMonitor performance_monitor_;
 };
 
 #endif  // SCENEPUBLISHER_H_

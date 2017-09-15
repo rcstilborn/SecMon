@@ -119,18 +119,19 @@ int main(int argc, char * argv[]) {
     // GUI interface
     GUI_Interface gui(io_service);  //, address, port, doc_root);
 
+//    PerformanceMetrics pm(io_service);
+
     // Main component
     SceneMonitor sceneMonitor(io_service, gui);
 
     // Create the first scene
-    sceneMonitor.start_monitoring("Camera 1", FLAGS_camera1, FLAGS_realtime_factor);
+    sceneMonitor.start_monitoring("Camera 1 with a y", FLAGS_camera1, FLAGS_realtime_factor);
 
     // Start the threadpool
     for (int i = 0; i < kNumThreadsInPool; i++)
       threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
 
     gui.start();
-    PerformanceMetrics pm(io_service);
     std::cout << "Press <ENTER> to exit" << std::endl << std::endl;
     while (1) {
       int ch = getch();

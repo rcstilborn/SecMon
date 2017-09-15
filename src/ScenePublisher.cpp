@@ -23,9 +23,10 @@ ScenePublisher::ScenePublisher(const std::string& display_name, const std::strin
       description_(description),
       gui_(gui),
       streams_list_mtx_(),
-      streams_() {
+      streams_(),
+      performance_monitor_() {
   add_stream("main");
-  add_stream("difference");
+//  add_stream("difference");
   add_stream("foreground");
 }
 
@@ -59,6 +60,8 @@ void ScenePublisher::add_stream(const std::string& name) {
 //}
 
 void ScenePublisher::process_next_frame(std::shared_ptr<Frame>& frame) {
+  frame->set_display_name(display_name_);
+  frame->set_display_stats(performance_monitor_.get_performance_string());
   for (auto stream : streams_)
     if (stream->image_ready.num_slots() > 0) {
       try {
