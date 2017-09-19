@@ -58,7 +58,7 @@ template <class T>
 class Pipeline {
  public:
   Pipeline() = delete;
-  explicit Pipeline(boost::asio::io_service& io_service, const unsigned int stats_interval = 5000);
+  explicit Pipeline(boost::asio::io_service& io_service, const unsigned int stats_interval = 0);
   virtual ~Pipeline();
 
   void addTimedElement(TimerType, const int, boost::function<void(std::shared_ptr<T>&)>);
@@ -115,8 +115,12 @@ void Pipeline<T>::addTimedElement(TimerType /*timer_type*/,
                                   const int interval, boost::function<void(std::shared_ptr<T>&)> work) {
   if (compiled_) throw "Can't add elements once the pipeline has been compiled";
   if (!elements_.empty()) throw "Can only add TimedElement to an empty pipeline";
-  time_stats_.emplace_back(new TimeStatsQueue());
-  elements_.emplace_back(new TimedWorkWrapper<T>(io_service_, work, interval, time_stats_.back()));
+  if (stats_interval_ > 0) {
+    time_stats_.emplace_back(new TimeStatsQueue());
+    elements_.emplace_back(new TimedWorkWrapper<T>(io_service_, work, interval, time_stats_.back()));
+  } else {
+    elements_.emplace_back(new TimedWorkWrapper<T>(io_service_, work, interval, nullptr));
+  }
 }
 
 template <class T>
@@ -133,8 +137,12 @@ template <class T>
 void Pipeline<T>::addElement(boost::function<void(std::shared_ptr<T>&)> work) {
   if (compiled_) throw "Can't add elements once the pipeline has been compiled";
   if (elements_.empty()) throw "Can only add regular Elements after a TimedElement or BlockingElement has been added";
-  time_stats_.emplace_back(new TimeStatsQueue());
-  elements_.emplace_back(new WorkWrapper<T>(io_service_, work, time_stats_.back()));
+  if (stats_interval_ > 0) {
+    time_stats_.emplace_back(new TimeStatsQueue());
+    elements_.emplace_back(new WorkWrapper<T>(io_service_, work, time_stats_.back()));
+  } else {
+    elements_.emplace_back(new WorkWrapper<T>(io_service_, work, nullptr));
+  }
 }
 
 template <class T>

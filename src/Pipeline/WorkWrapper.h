@@ -83,8 +83,8 @@ void WorkWrapper<T>::do_work(std::shared_ptr<T>& data) {
 
   // Report Times
   auto end_time = std::chrono::high_resolution_clock::now();
-//  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << std::endl;
-  time_stats_queue_->emplace(start_time, end_time);
+  if (time_stats_queue_ != nullptr)
+    time_stats_queue_->emplace(start_time, end_time);
 
   // Schedule the next element in the pipeline
   if (!next_.empty()) {
