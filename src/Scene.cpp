@@ -34,7 +34,7 @@ Scene::Scene(const std::string& name, const std::string& url,
              const double realtime_factor)
     : name_(name),
       components_(),
-      pipeline_(io_service) {
+      pipeline_(io_service, 5000) {
 
   // Construct the image source and add it to the pipeline
   std::shared_ptr<ImageSource> is_ptr(new ImageSource(url));
