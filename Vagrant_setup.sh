@@ -74,7 +74,7 @@ else
   echo
 fi
 
-  #sed -e '/using python/ s@;@: /usr/include/python${PYTHON_VERSION/3*/${PYTHON_VERSION}m} ;@' -i bootstrap.sh
+#sed -e '/using python/ s@;@: /usr/include/python${PYTHON_VERSION/3*/${PYTHON_VERSION}m} ;@' -i bootstrap.sh
 #usr/include/python3.5m/"
 
 # Install OpenBLAS
@@ -102,12 +102,12 @@ else
   echo
 fi
 
-# Install OpenCV 3.3.0
+# Install OpenCV 3.2.0
 if [ ! -d /usr/local/include/opencv2 ]
 then
   echo
   echo "*************************************"
-  echo "Installing OpenCV 3.3.0"
+  echo "Installing OpenCV 3.2.0"
   echo "*************************************"
   echo
 
