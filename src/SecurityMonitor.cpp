@@ -44,6 +44,8 @@ static bool ValidateCamera(const char* flagname, const std::string& value) {
 DEFINE_validator(camera1, &ValidateCamera);
 #endif // DEBUG
 
+DEFINE_string(camera1_name, "", "Display name for for camera 1");
+
 DEFINE_double(realtime_factor, 1.0, "Factor of real-time to operate at.  1.0 means realtime, 0.5 means half speed");
 // This is needed because of compiler warning for release builds
 #ifdef DEBUG
@@ -125,7 +127,7 @@ int main(int argc, char * argv[]) {
     SceneMonitor sceneMonitor(io_service, gui);
 
     // Create the first scene
-    sceneMonitor.start_monitoring("Camera 1 with a y", FLAGS_camera1, FLAGS_realtime_factor);
+    sceneMonitor.start_monitoring(FLAGS_camera1_name, FLAGS_camera1, FLAGS_realtime_factor);
 
     // Start the threadpool
     for (int i = 0; i < kNumThreadsInPool; i++)
