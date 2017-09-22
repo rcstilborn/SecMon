@@ -119,9 +119,7 @@ int main(int argc, char * argv[]) {
 
   try {
     // GUI interface
-    GUI_Interface gui(io_service);  //, address, port, doc_root);
-
-//    PerformanceMetrics pm(io_service);
+    GUI_Interface gui(io_service);
 
     // Main component
     SceneMonitor sceneMonitor(io_service, gui);
