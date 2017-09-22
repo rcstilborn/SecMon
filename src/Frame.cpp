@@ -16,6 +16,7 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -101,7 +102,8 @@ ScenePublisher::image_ptr Frame::get_image_as_jpg(const std::string& name) {
 ScenePublisher::image_ptr Frame::get_original_image_as_jpg() {
   if (!images_[0].empty()) {
     ScenePublisher::image_ptr buffer(new std::vector<unsigned char>());
-    cv::imencode(".jpg", images_[0], *buffer);
+//    cv::imencode(".jpg", images_[0], *buffer);
+    cv::imencode(".jpg", images_[0], *buffer, std::vector<int>({cv::IMWRITE_JPEG_QUALITY, 90}));
     return buffer;
   }
   throw std::invalid_argument("No data in original image");
