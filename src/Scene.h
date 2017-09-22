@@ -3,45 +3,45 @@
  *
  *  Created on: Jul 28, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef SCENE_H_
 #define SCENE_H_
 
-#include <boost/core/noncopyable.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/any.hpp>
 #include <cstdbool>
 #include <string>
-
-#include "FrameSequence.h"
-#include "ImageProcessing/ImageProcessor.h"
-#include "ImageSource/ImageSource.h"
-#include "OOI_Processing/OOI_Processor.h"
-#include "SceneInterface.h"
+#include <memory>
+#include <vector>
+#include "Pipeline/Pipeline.h"
+#include "Component.h"
 
 class GUI_Interface;
 
-class Scene : private boost::noncopyable {
-public:
-    Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui, const int fps = 1);
-    virtual ~Scene();
+class Scene {
+ public:
+  Scene(const std::string& name, const std::string& url, boost::asio::io_service& io_service, GUI_Interface& gui,
+        const double realtime_factor);
+  virtual ~Scene();
+  const std::string& get_name() const;
+  void shutdown();
+  void toggle_pause();
+  void set_realtime_factor(const double realtime_factor);
 
-    Camera& getCamera();
-    FrameSequence& getFrameSequence();
-    const std::string& getName() const;
-    void shutdown();
-    void togglePause();
-    void setFPS(const int fps);
-
-private:
-    const std::string& name;
-//    int interval;
-    FrameSequence frameSequence;
-    SceneInterface sceneIf;
-    OOI_Processor ooiProcessor;
-    ImageProcessor imageProcessor;
-    ImageSource imageSource;
-
-    bool isPaused_ = false;
+ private:
+  const std::string& name_;
+  std::vector<std::shared_ptr<Component>> components_;
+  pipeline::Pipeline<Frame> pipeline_;
+  bool isPaused_ = false;
+  double realtime_factor_ = 1.0;
+  int source_fps_ = 0;
+  // Make sure we can't copy them
+  Scene(const Scene&) = delete;
+  Scene& operator=(Scene) = delete;
 };
 
-#endif /* SCENE_H_ */
+#endif  // SCENE_H_

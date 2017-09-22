@@ -3,32 +3,37 @@
  *
  *  Created on: Aug 16, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef IMAGEPROCESSING_ROI_DETECTOR_H_
 #define IMAGEPROCESSING_ROI_DETECTOR_H_
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <opencv2/core/types.hpp>
 #include <cstdbool>
 #include <vector>
+#include <memory>
+#include "../Component.h"
 
-#include "../Frame.h"
+//#include "../Frame.h"
+class Frame;
 
-class ROI_Detector {
-public:
-    ROI_Detector();
-    virtual ~ROI_Detector();
+class ROI_Detector : public Component {
+ public:
+  ROI_Detector();
+  virtual ~ROI_Detector();
 
-    void processFrame(boost::shared_ptr<Frame> frame0);
+  void process_next_frame(std::shared_ptr<Frame>& frame);
 
 //private:
-    static bool isTooSmall(std::vector<cv::Point> contour);
-    static bool compareRectSize(const cv::Rect& a, const cv::Rect& b);
-    static bool isInside(const cv::Rect& small, const cv::Rect& large);
-    static int overlapPercentage(const cv::Rect& small, const cv::Rect& large);
-    void removeNested(std::vector<cv::Rect>& rects);
-    void consolidateRectangles(std::vector<cv::Rect>& rects);
+  static bool is_too_small_(std::vector<cv::Point> contour);
+  static bool compare_rect_size_(const cv::Rect& a, const cv::Rect& b);
+  static bool is_inside_(const cv::Rect& small, const cv::Rect& large);
+  static int overlap_percentage_(const cv::Rect& small, const cv::Rect& large);
+  void remove_nested(std::vector<cv::Rect>& rects);
+  void consolidate_rectangles(std::vector<cv::Rect>& rects);
 };
 
-#endif /* IMAGEPROCESSING_ROI_DETECTOR_H_ */
+#endif // IMAGEPROCESSING_ROI_DETECTOR_H_

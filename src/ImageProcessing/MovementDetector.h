@@ -1,24 +1,26 @@
-//
-// Created by richard on 10/7/15.
-//
+/*
+ * MovementDetector.h
+ *
+ *  Created on: Oct 7, 2015
+ *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
+ */
 
-#ifndef SECURITYMONITOR_MOVEMENTDETECTOR_H
-#define SECURITYMONITOR_MOVEMENTDETECTOR_H
 
+#ifndef IMAGEPROCESSING_MOVEMENTDETECTOR_H_
+#define IMAGEPROCESSING_MOVEMENTDETECTOR_H_
 
-#include <boost/smart_ptr/shared_ptr.hpp>
-
-#include "../Frame.h"
+#include <memory>
+#include "../Component.h"
 
 class Frame;
 
-class MovementDetector {
-
-public:
-    virtual void processFrame(boost::shared_ptr<Frame> frame0) = 0;
-    virtual ~MovementDetector();
-
+class MovementDetector : public Component {
+ public:
+  virtual void process_next_frame(std::shared_ptr<Frame>& frame) = 0;
+  virtual ~MovementDetector();
 };
 
-
-#endif //SECURITYMONITOR_MOVEMENTDETECTOR_H
+#endif // IMAGEPROCESSING_MOVEMENTDETECTOR_H_

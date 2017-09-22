@@ -2,41 +2,10 @@
 # Project files
 #
 
-SRCS = \
-src/GUI/Connection.cpp \
-src/GUI/GUI_Interface.cpp \
-src/GUI/HTTP_Server.cpp \
-src/GUI/MimeTypes.cpp \
-src/GUI/Reply.cpp \
-src/GUI/RequestHandler.cpp \
-src/GUI/RequestParser.cpp \
-src/GUI/Stream.cpp \
-src/GUI/StreamConnection.cpp \
-src/GUI/StreamDirectory.cpp \
-src/GUI/WebSocketServer.cpp \
-src/ImageSource/Camera.cpp \
-src/ImageSource/ImageSource.cpp \
-src/ImageProcessing/ImageProcessor.cpp \
-src/ImageProcessing/MovementDetectorBasic.cpp \
-src/ImageProcessing/MovementDetector.cpp \
-src/ImageProcessing/ROI_Detector.cpp \
-src/OOI_Processing/OOI_Processor.cpp \
-src/OOI_Processing/OOI.cpp \
-src/Frame.cpp \
-src/FrameSequence.cpp \
-src/PerformanceMetrics.cpp \
-src/Scene.cpp \
-src/SceneInterface.cpp \
-src/SceneMonitor.cpp \
-src/SecurityMonitor.cpp
+SRCS = $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
+SRCS := $(filter-out %_Test.cpp, $(SRCS))
 
-
-
-SRCS_T = \
-test/FrameTest.cpp \
-test/ImageProcessing/ROI_DetectorTest.cpp \
-test/OOI_Processing/OOI_Test.cpp
-
+SRCS_T = $(wildcard src/*_Test.cpp) $(wildcard src/**/*_Test.cpp)
 
 OBJS = $(SRCS:.cpp=.o)
 OBJS_T = $(SRCS_T:.cpp=.o)
@@ -46,14 +15,15 @@ EXE  = SecMon
 # Compiler flags
 #
 CXX	 = g++
-CXXFLAGS = -Wall -Werror -Wextra -std=c++11 -Weffc++
+# std::enable_shared_for_this requires -Wno-non-virtual-dtor
+CXXFLAGS = -Wall -Werror -Wextra -std=c++14 -Weffc++ -Wno-non-virtual-dtor -fmessage-length=0
 %.o : %.cpp
 
 #
 # Linker flags
 #
 LINKER_FLAGS = -L/usr/local/lib/ -lpthread
-LINKER_FLAGS += -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_core -lopencv_imgproc
+LINKER_FLAGS += -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_core -lopencv_imgproc -lopencv_objdetect
 LINKER_FLAGS += -lboost_system -lboost_date_time -lboost_thread
 LINKER_FLAGS += -lgflags -lglog -lopenblas
 #LINKER_FLAGS += -lcaffe -lglog -lgflags -lprotobuf -lm -lhdf5_hl -lhdf5 -lopenblas
@@ -68,14 +38,14 @@ DBGDIR = debug
 DBGDEPDIR = .depend/$(DBGDIR)
 DBGEXE = $(DBGDIR)/$(EXE)
 DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
-DBGCXXFLAGS = -pthread -DDEBUG -O0 -g3 -c -fmessage-length=0 -march=native -mmmx -msse -msse2 -msse3 -msse4.1 -mmovbe -mfpmath=sse
+DBGCXXFLAGS = -pthread -DDEBUG -O0 -g3 -c -march=native -mtune=native
 
 #
 # Unit test build settings
 #
-TSTDIR = testbuild
+TSTDIR = test
 TSTDEPDIR = .depend/$(TSTDIR)
-TSTEXE = $(TSTDIR)/$(EXE)Test
+TSTEXE = $(TSTDIR)/$(EXE)_Test
 TSTOBJS = $(filter-out debug/src/SecurityMonitor.o,$(DBGOBJS))
 TSTOBJS += $(addprefix $(TSTDIR)/, $(OBJS_T))
 #TSTOBJS += $(OBJS_T)
@@ -89,7 +59,7 @@ RELDEPDIR = .depend/$(RELDIR)
 RELEXE = $(RELDIR)/$(EXE)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 #RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mtune=native -mmmx -msse -msse2 -msse3 -msse4.1 -mmovbe -mfpmath=sse -ffast-math -fomit-frame-pointer -ffunction-sections
-RELCXXFLAGS = -pthread -DNDEBUG -O3 -c -fmessage-length=0 -march=native -mtune=native -ffast-math -fomit-frame-pointer -ffunction-sections
+RELCXXFLAGS = -pthread -DNDEBUG -Ofast -c -march=native -mtune=native
 .PHONY: all clean debug prep release remake test
 
 .SECONDARY:
@@ -146,6 +116,7 @@ $(DBGDIR)/:
 # Test rules
 #
 test: $(TSTEXE)
+	$(TSTEXE)
 
 $(TSTEXE): $(TSTOBJS)
 	$(CXX) $(CXXFLAGS) -o $(TSTEXE) $^ $(TSTLINKER_FLAGS)
@@ -179,10 +150,9 @@ $(RELDIR)/:
 # Other rules
 #
 prep:
-	@mkdir -p $(DBGDIR) $(RELDIR) $(DEPDIR)
+	@mkdir -p $(DBGDIR) $(RELDIR) $(TSTDIR) $(DEPDIR)
 
 remake: clean all
 
 clean:
-	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS) $(TSTEXE) $(TSTOBJS)
-	rm -rf $(DEPDIR)
+	rm -rf $(DBGDIR) $(RELDIR) $(TSTDIR) $(DEPDIR)

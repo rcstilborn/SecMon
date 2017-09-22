@@ -1,5 +1,5 @@
 /*
- * PerformanceMetrics.cpp
+ * PerformanceMonitor.cpp
  *
  *  Created on: Aug 4, 2015
  *      Author: richard
@@ -8,14 +8,9 @@
  *  Licensed under the MIT License
  */
 
-#include "PerformanceMetrics.h"
+#include "PerformanceMonitor.h"
 
 #include <glog/logging.h>
-#include <boost/asio/error.hpp>
-#include <boost/bind/arg.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/bind/placeholders.hpp>
-
 #include <string.h>
 #include <sys/resource.h>
 #include <sys/times.h>
@@ -24,22 +19,21 @@
 #include <stdio.h>
 #include <iomanip>
 #include <iostream>
+#include <string>
 #include <chrono>
+#include <memory>
 
 //#ifndef CPU_ONLY
 //#include
 //#endif
 
-PerformanceMetrics::PerformanceMetrics(boost::asio::io_service& io_service, const int interval)
+PerformanceMonitor::PerformanceMonitor(const int interval)
     : interval_(interval),
-      timer_(io_service, std::chrono::milliseconds(interval)),
       number_of_processors_(0),
       last_cpu_usage_(),
       last_system_cpu_usage_(),
-      last_user_cpu_usage_() {
-
-  this->timer_.expires_from_now(std::chrono::seconds(this->interval_));
-  this->timer_.async_wait(boost::bind(&PerformanceMetrics::get_next_stats, this, boost::placeholders::_1));
+      last_user_cpu_usage_(),
+      last_perf_time_(std::chrono::high_resolution_clock::now()) {
 
   FILE* file;
   struct tms timeSample;
@@ -79,43 +73,46 @@ PerformanceMetrics::PerformanceMetrics(boost::asio::io_service& io_service, cons
   DLOG(INFO)<< "Resolution of system_clock: " << ns2.count() << " ns\n";
 
   std::cout.precision(4);
+
+  peak_rss_mb_ = get_peak_rss_mb();
+  current_rss_mb_ = get_current_rss_mb();
+  cpu_usage_ = get_current_cpu_usage();
 }
 
-PerformanceMetrics::~PerformanceMetrics() {
+PerformanceMonitor::~PerformanceMonitor() {
 }
 
-void PerformanceMetrics::get_next_stats(const boost::system::error_code& ec) {
-  // Check for errors.
-  if (ec == boost::asio::error::operation_aborted) {
-    std::cout << "PerformanceMetrics::getNextStats() - timer cancelled" << std::endl;
-    return;
+const std::string PerformanceMonitor::get_performance_string() {
+  if (std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::high_resolution_clock::now() - last_perf_time_).count() > interval_) {
+    last_perf_time_ = std::chrono::high_resolution_clock::now();
+    peak_rss_mb_ = get_peak_rss_mb();
+    current_rss_mb_ = get_current_rss_mb();
+    cpu_usage_ = get_current_cpu_usage();
   }
-
-  std::cout << "\rCurrent=" << std::setw(5) << static_cast<int>(this->get_current_rss() / 1024) / 1024.0 << "Mb, Peak="
-            << std::setw(5) << static_cast<int>(this->get_peak_rss() / 1024) / 1024.0 << "Mb, CPU usage="
-            << std::setw(4) << this->get_current_cpu_usage() << "%     " << get_next_indicator() << "     "
-            << std::flush;
-  // Reset the timer
-  this->timer_.expires_at(this->timer_.expires_at() + std::chrono::seconds(this->interval_));
-  this->timer_.async_wait(boost::bind(&PerformanceMetrics::get_next_stats, this, boost::placeholders::_1));
+  std::string stats_text("CPU: ");
+  stats_text.append(std::to_string(cpu_usage_)).append("%  Curr: ");
+  stats_text.append(std::to_string(current_rss_mb_)).append("Mb  Peak: ");
+  stats_text.append(std::to_string(peak_rss_mb_)).append("Mb");
+  return stats_text;
 }
 
 /**
  * Returns the peak (maximum so far) resident set size (physical
- * memory use) measured in bytes, or zero if the value cannot be
+ * memory use) measured in Mbytes, or zero if the value cannot be
  * determined on this OS.
  */
-size_t PerformanceMetrics::get_peak_rss() {
+unsigned int PerformanceMonitor::get_peak_rss_mb() {
   struct rusage rusage;
   getrusage(RUSAGE_SELF, &rusage);
-  return (size_t) (rusage.ru_maxrss * 1024L);
+  return static_cast<unsigned int>(rusage.ru_maxrss / 1024.0);
 }
 
 /**
  * Returns the current resident set size (physical memory use) measured
- * in bytes, or zero if the value cannot be determined on this OS.
+ * in Mbytes, or zero if the value cannot be determined on this OS.
  */
-size_t PerformanceMetrics::get_current_rss() {
+unsigned int PerformanceMonitor::get_current_rss_mb() {
   /* Linux ---------------------------------------------------- */
   uint64_t rss = 0L;
   FILE* fp = NULL;
@@ -126,10 +123,10 @@ size_t PerformanceMetrics::get_current_rss() {
     return (size_t) 0L; /* Can't read? */
   }
   fclose(fp);
-  return (size_t) rss * (size_t) sysconf( _SC_PAGESIZE);
+  return static_cast<unsigned int>(rss * (size_t) sysconf( _SC_PAGESIZE) / 1048576);
 }
 
-double PerformanceMetrics::get_current_cpu_usage() {
+unsigned int PerformanceMonitor::get_current_cpu_usage() {
   struct tms timeSample;
   clock_t now;
   double percent;
@@ -149,15 +146,5 @@ double PerformanceMetrics::get_current_cpu_usage() {
   last_system_cpu_usage_ = timeSample.tms_stime;
   last_user_cpu_usage_ = timeSample.tms_utime;
 
-  return percent;
-}
-
-char PerformanceMetrics::get_next_indicator() {
-  if (last_indicator_ == '/')
-    last_indicator_ = '\\';
-  else if (last_indicator_ == '\\')
-    last_indicator_ = '|';
-  else if (last_indicator_ == '|')
-    last_indicator_ = '/';
-  return last_indicator_;
+  return static_cast<int>(percent);
 }

@@ -3,63 +3,40 @@
  *
  *  Created on: Oct 23, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
-#ifndef OOI_PROCESSING_IMAGESOURCE_H_
-#define OOI_PROCESSING_IMAGESOURCE_H_
+#ifndef IMAGESOURCE_IMAGESOURCE_H_
+#define IMAGESOURCE_IMAGESOURCE_H_
 
-#include <boost/asio/deadline_timer.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/core/noncopyable.hpp>
-#include <boost/function/function_fwd.hpp>
-#include <boost/function.hpp>
-#include <boost/system/error_code.hpp>
-#include <cstdbool>
+#include <memory>
 #include <string>
 
 #include "Camera.h"
+#include "../Component.h"
 
-class FrameSequence;
-class SceneInterface;
+class Frame;
+class ScenePublisher;
 
 class GUI_Interface;
 
-class ImageSource : private boost::noncopyable {
-public:
-    ImageSource(const std::string& name, const std::string& url, boost::asio::io_service& io_service, SceneInterface& sceneIf, FrameSequence& frameSequence, boost::function<void (const int)> next, const int fps = 1);
-    virtual ~ImageSource();
+class ImageSource : public Component {
+ public:
+  explicit ImageSource(const std::string& url);
+  virtual ~ImageSource();
+  void process_next_frame(std::shared_ptr<Frame>&);
+  int get_frames_per_second() const { return camera_.get_frames_per_second(); }
 
-    Camera& getCamera();
-    const std::string& getName() const;
-    void shutdown();
-    void togglePause();
+ private:
+  // Make sure we can't copy them
+  ImageSource(const ImageSource&);
+  ImageSource& operator=(ImageSource);
 
-    void setFPS(const int fps);
-
-private:
-    // Make sure we can't copy them
-//    Scene(const Scene&);
-//    Scene& operator=(Scene);
-
-    const std::string& name;
-    int interval;
-    Camera camera;
-
-    SceneInterface& sceneIf;
-    FrameSequence& frameSequence;
-
-    boost::function<void (const int)> next;
-
-    boost::asio::deadline_timer timer;
-    boost::asio::strand strand;
-
-    bool shuttingDown;
-    void getNextFrame(const boost::system::error_code& ec);
-
-    void restartTimer();
-    void startTimer();
-
-    bool isPaused_ = false;
+  Camera camera_;
+  const unsigned int width_;
+  const unsigned int height_;
 };
 
-#endif /* OOI_PROCESSING_IMAGESOURCE_H_ */
+#endif // IMAGESOURCE_IMAGESOURCE_H_

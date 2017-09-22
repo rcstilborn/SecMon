@@ -57,7 +57,7 @@ then
   echo "Installing Boost 1.64"
   echo "*************************************"
   echo
-  cd
+  cd /tmp
   wget -nv -O boost_1_64_0.tar.bz2 https://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.bz2 && \
   tar --bzip2 -xf boost_1_64_0.tar.bz2 && rm boost_1_64_0.tar.bz2
   cd boost_1_64_0
@@ -65,7 +65,7 @@ then
   ./bootstrap.sh --prefix=/usr --with-python=python3 && ./b2 stage threading=multi link=shared
   sudo ./b2 install threading=multi link=shared
   cd
-  rm -rf boost_1_64_0
+  rm -rf /tmp/boost_1_64_0
 else
   echo
   echo "*************************************"
@@ -74,7 +74,7 @@ else
   echo
 fi
 
-  #sed -e '/using python/ s@;@: /usr/include/python${PYTHON_VERSION/3*/${PYTHON_VERSION}m} ;@' -i bootstrap.sh
+#sed -e '/using python/ s@;@: /usr/include/python${PYTHON_VERSION/3*/${PYTHON_VERSION}m} ;@' -i bootstrap.sh
 #usr/include/python3.5m/"
 
 # Install OpenBLAS
@@ -85,15 +85,15 @@ then
   echo "Installing OpenBLAS 0.2.20"
   echo "*************************************"
   echo
-  cd
+  cd /tmp
   wget -nv -O OpenBLAS-0.2.20.tar.gz http://github.com/xianyi/OpenBLAS/archive/v0.2.20.tar.gz
-  tar -xf OpenBLAS-0.2.20.tar.gz
+  tar -xf OpenBLAS-0.2.20.tar.gz && rm OpenBLAS-0.2.20.tar.gz
   cd OpenBLAS-0.2.20
   make
   sudo make PREFIX=/usr install
   cd
-  rm -rf OpenBLAS-0.2.20
-  rm OpenBLAS-0.2.20.tar.gz
+  rm -rf /tmp/OpenBLAS-0.2.20
+  
 else
   echo
   echo "*************************************"
@@ -102,12 +102,12 @@ else
   echo
 fi
 
-# Install OpenCV 3.3.0
+# Install OpenCV 3.2.0
 if [ ! -d /usr/local/include/opencv2 ]
 then
   echo
   echo "*************************************"
-  echo "Installing OpenCV 3.3.0"
+  echo "Installing OpenCV 3.2.0"
   echo "*************************************"
   echo
 
@@ -164,6 +164,81 @@ else
 fi
 
 
+if [ ! -d /usr/local/include/gtest ]
+then
+  echo
+  echo "*************************************"
+  echo "Installing googletest and googlemock"
+  echo "*************************************"
+  echo
+
+  cd /tmp
+  git clone https://github.com/google/googletest.git
+  cd googletest/googletest/make
+  make
+  sudo cp gtest_main.a /usr/local/lib
+  cd ../../include
+  sudo cp -r gtest /usr/local/include
+  cd
+  rm -rf /tmp/googletest
+else
+  echo
+  echo "*************************************"
+  echo "googletest and googlemock already installed"
+  echo "*************************************"
+  echo
+fi
+
+exit 
+
+if [ ! -f /usr/local/include/libsourcey.h ]
+then
+  echo
+  echo "*************************************"
+  echo "Installing libsourcey & webRTC"
+  echo "*************************************"
+  echo
+  sudo apt-get install --yes libomp-dev openssl libssl-dev libx11-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libswresample-dev libpostproc-dev libgl1-mesa-dev libglu1-mesa-dev
+  
+  mkdir /tmp/webrtc
+  cd /tmp/webrtc
+  wget -nv -O https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-17657-02ba69d-linux-x64.tar.gz
+  tar -xf webrtc-17657-02ba69d-linux-x64.tar.gz
+ 
+  cd /tmp
+  git clone https://github.com/sourcey/libsourcey.git
+  cd libsourcey
+  mkdir build
+  cd build         
+  cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
+         -DBUILD_MODULES=OFF -DBUILD_APPLICATIONS=OFF \
+         -DBUILD_SAMPLES=OFF -DBUILD_TESTS=OFF \
+         -DWITH_WEBRTC=ON -DWITH_FFMPEG=ON -DWITH_OPENCV=ON \
+         -DBUILD_MODULE_base=ON -DBUILD_MODULE_crypto=ON \
+         -DBUILD_MODULE_http=ON -DBUILD_MODULE_json=ON \
+         -DBUILD_MODULE_av=ON -DBUILD_MODULE_net=ON \
+         -DBUILD_MODULE_socketio=ON -DBUILD_MODULE_symple=ON \
+         -DBUILD_MODULE_util=ON -DBUILD_MODULE_uv=ON \
+         -DBUILD_MODULE_webrtc=ON -DWEBRTC_ROOT_DIR=/tmp/webrtc \
+         -DCMAKE_CXX_FLAGS=-fopenmp
+  make
+  sudo make install
+
+  #rm -rf /tmp/libsourcey
+else
+  echo
+  echo "*************************************"
+  echo "libsourcey already installed"
+  echo "*************************************"
+  echo
+fi
+
+
+# For node.js
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+
 # Install anaconda
 if [ ! -d $HOME/anaconda3 ]
 then
@@ -184,90 +259,3 @@ else
   echo "*************************************"
   echo
 fi
-
-
-if [ ! -d /usr/local/include/gtest ]
-then
-  echo
-  echo "*************************************"
-  echo "Installing googletest and googlemock"
-  echo "*************************************"
-  echo
-
-  git clone https://github.com/google/googletest.git
-  cd googletest/googletest/make
-  make
-  sudo cp gtest_main.a /usr/local/lib
-  cd ../../include
-  sudo cp -r gtest /usr/local/include
-
-  #rm -rf 
-else
-  echo
-  echo "*************************************"
-  echo "googletest and googlemock already installed"
-  echo "*************************************"
-  echo
-fi
-
-
-
-
-exit
-
-# libsourcey & webRTC
-if [ ! -d $HOME/ ]
-then
-  echo
-  echo "*************************************"
-  echo "Installing webRTC"
-  echo "*************************************"
-  echo
-  cd
-  wget -nv -O webrtc-18252-6294a7e-linux-x64.tar.gz https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-18252-6294a7e-linux-x64.tar.gz
-  tar -xf webrtc-18252-6294a7e-linux-x64.tar.gz
-# These instructions did't work
-#  sudo apt-get install -y openssl libssl-dev
-#  mkdir ~/tmp && cd ~/tmp
-#  git clone https://github.com/rcstilborn/webrtc-builds.git
-#  cd webrtc-builds
-#  conda create -y --name webRTCbuild python=2
-#  source activate webRTCbuild
-#  ./build.sh -l jsoncpp -e 1
-#  rm ~/tmp/webrtc-builds
-else
-  echo
-  echo "*************************************"
-  echo "webRTC already installed"
-  echo "*************************************"
-  echo
-fi
-
-
-
-if [ ! -d $HOME/ ]
-then
-  echo
-  echo "*************************************"
-  echo "Installing libsourcey"
-  echo "*************************************"
-  echo
-  cd ~/tmp
-  git clone https://github.com/sourcey/libsourcey.git
-  cd libsourcey
-  mkdir build
-  cd build
-  cmake .. -DCMAKE_BUILD_TYPE=RELEASE # extra cmake commands here, see below for a full list...
-  make
-  sudo make install
-
-  rm ~/tmp/libsourcey
-else
-  echo
-  echo "*************************************"
-  echo "libsourcey already installed"
-  echo "*************************************"
-  echo
-fi
-
-

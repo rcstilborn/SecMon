@@ -2,7 +2,7 @@
 vagrant-provision.log
 /debug/
 /release/
-/testbuild/
+/test/
 /.depend/
 SecMon.cbp
 CppCheckResults.xml

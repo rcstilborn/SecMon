@@ -11,16 +11,16 @@
 #ifndef SCENEMONITOR_H_
 #define SCENEMONITOR_H_
 
-#include <string>
-#include <boost/ptr_container/ptr_map.hpp>
 #include <boost/core/noncopyable.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 #include <boost/thread/pthread/mutex.hpp>
+#include <string>
 
 #include "Scene.h"
 
 class Scene;
 
-//struct scene_details {
+// struct scene_details {
 //    std::string name;
 //    unsigned short int height;
 //    unsigned short int width;
@@ -28,21 +28,21 @@ class Scene;
 
 class SceneMonitor : private boost::noncopyable {
  public:
-    SceneMonitor(boost::asio::io_service& io_service, GUI_Interface& gui);
-    virtual ~SceneMonitor();
-    void start_monitoring(const std::string& name, const std::string& url);
-    void stop_monitoring(const std::string&);
-    void stop_all_monitoring();
-    const std::string get_scene_names() const;
-    //    std::vector<scene_details> getSceneDetails();
-    void toggle_pause();
-    void set_frames_per_second(const int fps);
+  SceneMonitor(boost::asio::io_service& io_service, GUI_Interface& gui);
+  virtual ~SceneMonitor();
+  void start_monitoring(const std::string& name, const std::string& url, const double realtime_factor);
+  void stop_monitoring(const std::string&);
+  void stop_all_monitoring();
+  const std::string get_scene_names() const;
+  //    std::vector<scene_details> getSceneDetails();
+  void toggle_pause();
+  void set_realtime_factor(const double realtime_factor);
 
  private:
-    boost::asio::io_service& io_service_;
-    GUI_Interface& gui_;
-    boost::ptr_map<std::string, Scene> scenes_;
-    boost::mutex scenes_mtx_;
+  boost::asio::io_service& io_service_;
+  GUI_Interface& gui_;
+  boost::ptr_map<std::string, Scene> scenes_;
+  boost::mutex scenes_mtx_;
 };
 
-#endif // SCENEMONITOR_H_
+#endif  // SCENEMONITOR_H_

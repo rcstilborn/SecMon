@@ -3,6 +3,9 @@
  *
  *  Created on: Aug 8, 2015
  *      Author: richard
+ *
+ *  Copyright 2017 Richard Stilborn
+ *  Licensed under the MIT License
  */
 
 #ifndef GUI_REQUEST_H_
@@ -18,8 +21,7 @@ namespace http {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 /// A request received from a client.
-struct Request
-{
+struct Request {
   std::string method;
   std::string uri;
   int http_version_major;
@@ -28,6 +30,6 @@ struct Request
 };
 #pragma GCC diagnostic pop
 
-} // namespace http
+}  // namespace http
 
-#endif /* GUI_REQUEST_H_ */
+#endif // GUI_REQUEST_H_
