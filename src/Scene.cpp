@@ -23,7 +23,6 @@
 #include "ImageProcessing/MovementDetectorBasic.h"
 #include "ImageProcessing/ROI_Detector.h"
 #include "ImageSource/ImageSource.h"
-#include "ObjectProcessing/HaarClassifier.h"
 #include "ObjectProcessing/OOI_Processor.h"
 #include "Pipeline/Pipeline.h"
 #include "Component.h"

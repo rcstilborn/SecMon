@@ -69,7 +69,8 @@ ifeq ($(shell which nvcc),) # No 'nvcc' found
 CXXFLAGS += -DCPU_ONLY
 else
 CXXFLAGS += -I/usr/local/cuda/targets/x86_64-linux/include
-LINKER_FLAGS += -lopencv_gpu
+LINKER_FLAGS += -fopenmp
+#LINKER_FLAGS += -lopencv_gpu
 endif
 
 
