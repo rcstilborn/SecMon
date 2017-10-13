@@ -25,8 +25,8 @@
 #include <iostream>
 #include <string>
 
-DEFINE_int32(port, 12345, "Port for webserver");
-DEFINE_string(ip_address, "", "IP Address of web server");
+DEFINE_int32(port, 9001, "Port for webserver");
+DEFINE_string(ip_address, "0.0.0.0", "IP Address of web server");
 DEFINE_string(doc_root, "public", "Document root for web server");
 // This is needed because of compiler warning for release builds
 #ifdef DEBUG
