@@ -31,8 +31,9 @@ class Frame {
  public:
   Frame() = delete;
   Frame(const int width, const int height);
-//  Frame(const int frame_id, const int width, const int height);
   virtual ~Frame();
+  Frame(const Frame&) = delete;
+  Frame& operator=(Frame) = delete;
 
 //  void set_start_time();
 
@@ -46,16 +47,12 @@ class Frame {
   ScenePublisher::image_ptr get_image_as_jpg(const std::string& name1, const std::string& name2);
   ScenePublisher::image_ptr get_original_image_as_jpg();
   ScenePublisher::image_ptr get_original_with_overlay_image_as_jpg();
-  const std::vector<cv::Rect>& getRoIs() const;
   std::vector<cv::Rect>& get_regions_of_interest();
   void set_display_time(const std::string time) {display_time_ = time; }
   void set_display_name(const std::string name) {display_name_ = name; }
   void set_display_stats(const std::string stats) {display_stats_ = stats; }
-  //void set_record_indicator();
+
  private:
-  // Make sure we can't copy them
-  Frame(const Frame&) = delete;
-  Frame& operator=(Frame) = delete;
   cv::Size frame_size_;
   cv::Mat images_[kMaxImagesPerFrame];
 #ifndef CPU_ONLY

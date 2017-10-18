@@ -127,11 +127,13 @@ ScenePublisher::image_ptr Frame::get_original_with_overlay_image_as_jpg() {
   if (images_[0].empty())
     throw std::invalid_argument("No data in original image");
 
-  cv::Mat display_image;
+  cv::Mat display_image(frame_size_.height + border_height_, frame_size_.width, images_[0].dims);
   cv::copyMakeBorder(images_[0], display_image, border_height_, 0, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-//  images_[0].copyTo(display_image);
 
-  images_[1].copyTo(display_image(cv::Rect(0, border_height_, frame_size_.width, frame_size_.height)), images_[1]);
+  // Create a mask and use to apply overlay to display
+  cv::Mat mask;
+  cv::cvtColor(images_[1], mask, cv::COLOR_BGR2GRAY);
+  images_[1].copyTo(display_image(cv::Rect(0, border_height_, frame_size_.width, frame_size_.height)), mask);
 
   if (!display_time_.empty()) {
     cv::putText(display_image, display_time_, cv::Point(40, border_height_ - 15),
@@ -157,9 +159,9 @@ ScenePublisher::image_ptr Frame::get_original_with_overlay_image_as_jpg() {
   return buffer;
 }
 
-const std::vector<cv::Rect>& Frame::getRoIs() const {
-  return regions_of_interest_;
-}
+//const std::vector<cv::Rect>& Frame::getRoIs() const {
+//  return regions_of_interest_;
+//}
 
 std::vector<cv::Rect>& Frame::get_regions_of_interest() {
   return regions_of_interest_;
