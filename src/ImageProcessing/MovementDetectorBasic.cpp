@@ -66,16 +66,16 @@ void MovementDetectorBasic::process_next_frame(std::shared_ptr<Frame>& current_f
   //threshold intensity image at a given sensitivity value
   cv::threshold(difference_image, foreground_image, kSensitivityValue, 255, cv::THRESH_BINARY);
 
-  std::vector<std::vector<cv::Point> > v;
+  std::vector<std::vector<cv::Point> > contours;
   std::vector<cv::Vec4i> hierarchy;
-  cv::findContours(foreground_image, v, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+  cv::findContours(foreground_image, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
   foreground_image = cv::Scalar(0, 0, 0);
-  for (size_t i = 0; i < v.size(); ++i) {
+  for (size_t i = 0; i < contours.size(); ++i) {
     // drop smaller blobs
-    if (cv::contourArea(v[i]) < 5)
+    if (cv::contourArea(contours[i]) < 5)
       continue;
     // draw filled blob
-    cv::drawContours(foreground_image, v, i, cv::Scalar(255, 0, 0), CV_FILLED, 8, hierarchy, 0, cv::Point());
+    cv::drawContours(foreground_image, contours, i, cv::Scalar(255, 0, 0), CV_FILLED, 8, hierarchy, 0, cv::Point());
   }
 
   cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(25, 25));

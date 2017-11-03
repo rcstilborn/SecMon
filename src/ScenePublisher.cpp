@@ -28,6 +28,7 @@ ScenePublisher::ScenePublisher(const std::string& display_name, const std::strin
   add_stream("main");
   add_stream("overlay");
   add_stream("foreground");
+  add_stream("difference");
 }
 
 ScenePublisher::~ScenePublisher() {

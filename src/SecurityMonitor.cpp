@@ -82,7 +82,7 @@ DEFINE_validator(realtime_factor, &ValidateRealtimeFactor);
 
  */
 
-const int kNumThreadsInPool = 4;
+const int kNumThreadsInPool = 8;
 
 //void doMenu();
 char getch();
@@ -100,6 +100,8 @@ int main(int argc, char * argv[]) {
 
   ::google::InitGoogleLogging("SecMon");
   ::google::InstallFailureSignalHandler();
+
+  std::cout << "Using OpenCV " << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << "." << CV_SUBMINOR_VERSION << std::endl;
 
 #ifndef CPU_ONLY
   std::cout << "GPUs found: " << cv::cuda::getCudaEnabledDeviceCount() << std::endl;
